@@ -38,7 +38,9 @@ CLICK_ID      = os.environ.get("CLICK_MERCHANT_ID", "")
 ADMIN_SECRET  = os.environ.get("ADMIN_SECRET", "novamind-admin-2025")
 
 # ── DATABASE ──────────────────────────────────
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "novamind.db")
+# Vercel serverless da /tmp/ ishlatish kerak (filesystem read-only)
+_IS_VERCEL = os.environ.get("VERCEL", "") == "1"
+DB_PATH = "/tmp/novamind.db" if _IS_VERCEL else os.path.join(os.path.dirname(os.path.abspath(__file__)), "novamind.db")
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -389,7 +391,7 @@ def create_slides():
     if not topic: return jsonify({"error":"Mavzu kiritilmadi"}), 400
     lang_map = {"uz":"O'zbek tilida","ru":"Rus tilida","en":"English"}
     sys_p = 'Siz professional prezentatsiya yaratuvchi AI. FAQAT JSON: {"title":"...","subtitle":"...","author":"NovaMind AI","slides":[{"type":"title","title":"...","subtitle":"...","notes":"..."},{"type":"content","title":"...","points":["..."],"notes":"..."},{"type":"end","title":"...","message":"...","notes":"..."}]}'
-    user_p = f"Mavzu: {topic}Soni: {count}Til: {lang_map.get(lang,'Ozbek')}Uslub: {style}\nFAQAT JSON."
+    user_p = f"Mavzu: {topic}\nSoni: {count}\nTil: {lang_map.get(lang,'Ozbek')}\nUslub: {style}\nFAQAT JSON."
     try:
         raw,tokens = groq_chat(
             [{"role":"system","content":sys_p},{"role":"user","content":user_p}],
