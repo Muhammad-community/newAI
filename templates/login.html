@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — Kirish{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-glow"></div>
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-hex">
+        <svg viewBox="0 0 40 40" width="44" height="44">
+          <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <polygon points="20,8 31,14.5 31,25.5 20,32 9,25.5 9,14.5" fill="currentColor" opacity="0.15"/>
+          <text x="20" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="currentColor">N</text>
+        </svg>
+      </div>
+      <div>
+        <h2>Nova<span class="logo-accent">Mind</span> AI</h2>
+        <p class="auth-sub">Tizimga kirish</p>
+      </div>
+    </div>
+
+    <div id="authError" class="auth-error" style="display:none"></div>
+
+    <div class="fgroup">
+      <label>📧 Email</label>
+      <input type="email" id="email" placeholder="email@example.com" autocomplete="email"/>
+    </div>
+    <div class="fgroup">
+      <label>🔒 Parol</label>
+      <div class="pass-wrap">
+        <input type="password" id="password" placeholder="Parolingiz" autocomplete="current-password"/>
+        <button class="pass-eye" onclick="togglePass()" type="button">👁</button>
+      </div>
+    </div>
+
+    <button class="btn-auth" id="loginBtn" onclick="doLogin()">
+      <span class="btn-glow-inner">Kirish ✦</span>
+    </button>
+
+    <div class="auth-divider"><span>yoki</span></div>
+
+    <div class="auth-footer">
+      Hisob yo'qmi? <a href="/register">Ro'yxatdan o'tish →</a>
+    </div>
+    <div class="auth-footer" style="margin-top:8px">
+      <a href="/" style="color:var(--txt3);font-size:13px">← Bosh sahifaga qaytish</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePass(){
+  const p = document.getElementById('password');
+  p.type = p.type === 'password' ? 'text' : 'password';
+}
+document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('password').focus(); });
+
+async function doLogin(){
+  const btn   = document.getElementById('loginBtn');
+  const errEl = document.getElementById('authError');
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  errEl.style.display = 'none';
+  if(!email || !password){ showErr('Email va parolni kiriting'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-glow-inner">Yuklanmoqda...</span>';
+  try {
+    const res  = await fetch('/api/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    const data = await res.json();
+    if(data.success){
+      const next = new URLSearchParams(location.search).get('next') || '/plans';
+      location.href = next;
+    } else {
+      showErr(data.error || 'Xatolik yuz berdi');
+      btn.disabled = false;
+      btn.innerHTML = '<span class="btn-glow-inner">Kirish ✦</span>';
+    }
+  } catch(e){
+    showErr('Tarmoq xatoligi');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="btn-glow-inner">Kirish ✦</span>';
+  }
+}
+function showErr(msg){
+  const el = document.getElementById('authError');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+}
+</script>
+{% endblock %}

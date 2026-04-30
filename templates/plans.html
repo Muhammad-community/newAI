@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — Planlar{% endblock %}
+{% block content %}
+<section class="plans-page">
+
+  <div class="plans-hero">
+    <div class="sec-label">💳 Narxlar</div>
+    <h1 class="plans-title">O'zingizga <span class="logo-accent">to'g'ri plan</span> tanlang</h1>
+    <p class="plans-sub">PayMe · Click · Bank o'tkazmasi orqali to'lang</p>
+    <div class="plans-trust">
+      <span>🔒 Xavfsiz</span>
+      <span>📱 PayMe / Click</span>
+      <span>🏦 Bank o'tkazmasi</span>
+      <span>⚡ 1-24 soat ichida faollashadi</span>
+    </div>
+  </div>
+
+  {% if user %}
+  <div class="current-plan-banner">
+    <div class="cpb-left">
+      <span>👋 Salom, <strong>{{ user.username }}</strong></span>
+      <span class="plan-badge plan-{{ user.plan }}">
+        {% if user.plan=='free' %}🆓 Free
+        {% elif user.plan=='pro' %}⭐ Pro
+        {% elif user.plan=='premium' %}💎 Premium
+        {% elif user.plan=='ultra' %}🚀 Ultra
+        {% endif %}
+        — Joriy plan
+      </span>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Plans Grid ─────────────────────────── -->
+  <div class="plans-grid">
+
+    <!-- FREE -->
+    <div class="plan-card {% if user and user.plan=='free' %}plan-active{% endif %}">
+      <div class="plan-header">
+        <div class="plan-icon">🆓</div>
+        <h3>Free</h3>
+        <div class="plan-price"><span class="price-big">$0</span><span class="price-per">/oy</span></div>
+        <p class="plan-desc">Sinab ko'rish uchun</p>
+      </div>
+      <ul class="plan-features">
+        <li class="feat-yes">✅ LLaMA 3.1 8B model</li>
+        <li class="feat-yes">✅ Cheksiz suhbat</li>
+        <li class="feat-yes">✅ 3 til (UZ / RU / EN)</li>
+        <li class="feat-yes">✅ PDF · Word · Excel tahlil</li>
+        <li class="feat-no">❌ Barcha 4 model</li>
+        <li class="feat-no">❌ Rasm yaratish</li>
+        <li class="feat-no">❌ Slayd yaratish</li>
+      </ul>
+      {% if user and user.plan == 'free' %}
+        <button class="plan-btn plan-btn-current" disabled>✓ Joriy plan</button>
+      {% elif not user %}
+        <a href="/register" class="plan-btn plan-btn-outline">Bepul boshlash →</a>
+      {% else %}
+        <button class="plan-btn plan-btn-outline" disabled>Asosiy plan</button>
+      {% endif %}
+    </div>
+
+    <!-- PRO -->
+    <div class="plan-card {% if user and user.plan=='pro' %}plan-active{% endif %}">
+      <div class="plan-header">
+        <div class="plan-icon">⭐</div>
+        <h3>Pro</h3>
+        <div class="plan-price"><span class="price-big">$9.99</span><span class="price-per">/oy</span></div>
+        <p class="plan-desc">~125 000 so'm · Professional uchun</p>
+      </div>
+      <ul class="plan-features">
+        <li class="feat-yes feat-hl">✅ <strong>Barcha 4 ta model</strong></li>
+        <li class="feat-yes feat-hl">✅ <strong>LLaMA 3.3 70B</strong></li>
+        <li class="feat-yes">✅ Cheksiz suhbat</li>
+        <li class="feat-yes">✅ PDF · Word · Excel tahlil</li>
+        <li class="feat-yes">✅ Vision (rasm tahlil)</li>
+        <li class="feat-no">❌ Rasm yaratish</li>
+        <li class="feat-no">❌ Slayd yaratish</li>
+      </ul>
+      {% if user and user.plan == 'pro' %}
+        <button class="plan-btn plan-btn-current" disabled>✓ Joriy plan</button>
+      {% elif user %}
+        <button class="plan-btn plan-btn-pro" onclick="openModal('pro')">⭐ Pro — $9.99/oy</button>
+      {% else %}
+        <a href="/register?next=/plans" class="plan-btn plan-btn-pro">Boshlash ⭐</a>
+      {% endif %}
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="plan-card plan-featured {% if user and user.plan=='premium' %}plan-active{% endif %}">
+      <div class="plan-badge-top">🔥 Ko'p tanlangan</div>
+      <div class="plan-header">
+        <div class="plan-icon">💎</div>
+        <h3>Premium</h3>
+        <div class="plan-price"><span class="price-big">$19.99</span><span class="price-per">/oy</span></div>
+        <p class="plan-desc">~250 000 so'm · Ijodkorlar uchun</p>
+      </div>
+      <ul class="plan-features">
+        <li class="feat-yes feat-hl">✅ <strong>Barcha 4 ta model</strong></li>
+        <li class="feat-yes feat-hl">✅ <strong>🎨 Rasm yaratish</strong></li>
+        <li class="feat-yes">✅ Cheksiz suhbat</li>
+        <li class="feat-yes">✅ PDF · Word · Excel tahlil</li>
+        <li class="feat-yes">✅ Vision (rasm tahlil)</li>
+        <li class="feat-no">❌ Slayd yaratish</li>
+      </ul>
+      {% if user and user.plan == 'premium' %}
+        <button class="plan-btn plan-btn-current" disabled>✓ Joriy plan</button>
+      {% elif user %}
+        <button class="plan-btn plan-btn-premium" onclick="openModal('premium')">💎 Premium — $19.99/oy</button>
+      {% else %}
+        <a href="/register?next=/plans" class="plan-btn plan-btn-premium">Boshlash 💎</a>
+      {% endif %}
+    </div>
+
+    <!-- ULTRA -->
+    <div class="plan-card plan-ultra-card {% if user and user.plan=='ultra' %}plan-active{% endif %}">
+      <div class="plan-badge-top ultra-badge">🚀 To'liq imkoniyat</div>
+      <div class="plan-header">
+        <div class="plan-icon">🚀</div>
+        <h3>Ultra</h3>
+        <div class="plan-price"><span class="price-big">$39.99</span><span class="price-per">/oy</span></div>
+        <p class="plan-desc">~500 000 so'm · Biznes uchun</p>
+      </div>
+      <ul class="plan-features">
+        <li class="feat-yes feat-hl">✅ <strong>Barcha 4 ta model</strong></li>
+        <li class="feat-yes feat-hl">✅ <strong>🎨 Rasm yaratish</strong></li>
+        <li class="feat-yes feat-hl">✅ <strong>🗂️ Slayd yaratish</strong></li>
+        <li class="feat-yes">✅ Cheksiz suhbat</li>
+        <li class="feat-yes">✅ Barcha fayl formatlari</li>
+        <li class="feat-yes">✅ Vision (rasm tahlil)</li>
+      </ul>
+      {% if user and user.plan == 'ultra' %}
+        <button class="plan-btn plan-btn-current" disabled>✓ Joriy plan</button>
+      {% elif user %}
+        <button class="plan-btn plan-btn-ultra" onclick="openModal('ultra')">🚀 Ultra — $39.99/oy</button>
+      {% else %}
+        <a href="/register?next=/plans" class="plan-btn plan-btn-ultra">Boshlash 🚀</a>
+      {% endif %}
+    </div>
+
+  </div><!-- /plans-grid -->
+
+  <!-- ── Compare Table ──────────────────────── -->
+  <div class="compare-section">
+    <h2 class="sec-title">Batafsil taqqoslash</h2>
+    <div class="compare-table-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Imkoniyat</th>
+            <th>🆓 Free</th>
+            <th>⭐ Pro</th>
+            <th>💎 Premium</th>
+            <th>🚀 Ultra</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>AI Suhbat</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Modellar soni</td><td>1 ta</td><td>4 ta</td><td>4 ta</td><td>4 ta</td></tr>
+          <tr><td>LLaMA 3.3 70B</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Rasm yaratish</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Slayd yaratish</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Vision · PDF · Word</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr>
+            <td>Narx/oy</td>
+            <td><strong>Bepul</strong></td>
+            <td><strong>$9.99</strong></td>
+            <td><strong>$19.99</strong></td>
+            <td><strong>$39.99</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- ════════════════════════════════
+     TO'LOV MODALI
+════════════════════════════════════ -->
+<div id="payBg" class="pay-modal-bg" style="display:none">
+  <div class="pay-modal">
+    <button class="pay-modal-close" onclick="closeModal()">✕</button>
+
+    <!-- Qadam 1 — Usul tanlash -->
+    <div id="s1">
+      <div class="pay-modal-head">
+        <span id="mIcon" style="font-size:40px">💎</span>
+        <div>
+          <h3 id="mName" style="font-family:var(--fhead);font-size:18px;font-weight:800;margin:0 0 4px">Premium plan</h3>
+          <p id="mPrice" style="color:var(--cyan);font-weight:700;font-size:13px;margin:0">$19.99 / oy</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--txt2);font-weight:600;margin-bottom:14px">To'lov usulini tanlang:</p>
+      <div class="pay-methods">
+        <button class="pay-method-btn" onclick="chooseMethod('payme')">
+          <span class="pm-icon">📱</span>
+          <div><strong>PayMe</strong><span>Tez va qulay</span></div>
+        </button>
+        <button class="pay-method-btn" onclick="chooseMethod('click')">
+          <span class="pm-icon">⚡</span>
+          <div><strong>Click</strong><span>Tez va qulay</span></div>
+        </button>
+        <button class="pay-method-btn" onclick="chooseMethod('bank')">
+          <span class="pm-icon">🏦</span>
+          <div><strong>Bank o'tkazmasi</strong><span>Karta orqali</span></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Qadam 2 — Ko'rsatmalar + ID -->
+    <div id="s2" style="display:none">
+      <button class="pay-back-btn" onclick="showStep(1)">← Orqaga</button>
+      <h3 id="s2Title" style="font-family:var(--fhead);font-size:17px;font-weight:700;margin-bottom:18px">PayMe orqali to'lash</h3>
+
+      <!-- PayMe ko'rsatmalar -->
+      <div id="inPayme" class="pay-instr" style="display:none">
+        <div class="pay-instr-steps">
+          <div class="pay-instr-step"><span class="pis-num">1</span><div>PayMe ilovasini oching yoki <strong>payme.uz</strong> ga kiring</div></div>
+          <div class="pay-instr-step"><span class="pis-num">2</span><div>"To'lov" → "Qidiruv" → <strong>NovaMind AI</strong> qidiring</div></div>
+          <div class="pay-instr-step"><span class="pis-num">3</span><div>Summani kiriting: <strong id="pmAmt" class="pay-amount-hl"></strong></div></div>
+          <div class="pay-instr-step"><span class="pis-num">4</span><div>To'lovni amalga oshiring va <strong>chek raqamini</strong> quyida kiriting</div></div>
+        </div>
+        <div class="pay-contact-note">📱 Telegram: <a href="https://t.me/tolibovmuhammad" target="_blank">@tolibovmuhammad</a> ga ham yuborishingiz mumkin</div>
+      </div>
+
+      <!-- Click ko'rsatmalar -->
+      <div id="inClick" class="pay-instr" style="display:none">
+        <div class="pay-instr-steps">
+          <div class="pay-instr-step"><span class="pis-num">1</span><div>Click ilovasini oching yoki <strong>click.uz</strong> ga kiring</div></div>
+          <div class="pay-instr-step"><span class="pis-num">2</span><div>"To'lov" → "Xizmatlar" → <strong>NovaMind AI</strong> qidiring</div></div>
+          <div class="pay-instr-step"><span class="pis-num">3</span><div>Summani kiriting: <strong id="clAmt" class="pay-amount-hl"></strong></div></div>
+          <div class="pay-instr-step"><span class="pis-num">4</span><div>To'lovni amalga oshiring va <strong>tranzaksiya ID</strong> ni quyida kiriting</div></div>
+        </div>
+        <div class="pay-contact-note">📱 Telegram: <a href="https://t.me/tolibovmuhammad" target="_blank">@tolibovmuhammad</a> ga ham yuborishingiz mumkin</div>
+      </div>
+
+      <!-- Bank ko'rsatmalar -->
+      <div id="inBank" class="pay-instr" style="display:none">
+        <div class="pay-instr-steps">
+          <div class="pay-instr-step"><span class="pis-num">1</span><div>Quyidagi kartaga pul o'tkazing:</div></div>
+        </div>
+        <div class="bank-card-info">
+          <div class="bci-row"><span>Karta:</span><strong id="bciCard" class="bci-copy">8600 0000 0000 0000 📋</strong></div>
+          <div class="bci-row"><span>Egasi:</span><strong>Tolibov Muhammad</strong></div>
+          <div class="bci-row"><span>Bank:</span><strong>Kapitalbank</strong></div>
+          <div class="bci-row"><span>Summa:</span><strong id="bkAmt" class="pay-amount-hl"></strong></div>
+        </div>
+        <div class="pay-instr-steps" style="margin-top:12px">
+          <div class="pay-instr-step"><span class="pis-num">2</span><div>O'tkazma izohiga foydalanuvchi nomingizni yozing</div></div>
+          <div class="pay-instr-step"><span class="pis-num">3</span><div>To'lov raqami (chek ID) ni quyida kiriting</div></div>
+        </div>
+        <div class="pay-contact-note">📱 Telegram: <a href="https://t.me/tolibovmuhammad" target="_blank">@tolibovmuhammad</a> ga chek rasmini ham yuboring</div>
+      </div>
+
+      <!-- Tranzaksiya ID kiritish -->
+      <div style="margin-top:20px;margin-bottom:18px">
+        <label id="txnLbl" style="display:block;font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:8px">
+          Chek / Tranzaksiya ID raqami:
+        </label>
+        <input type="text" id="txnVal" class="pay-txn-input" placeholder="Masalan: 1234567890"/>
+        <div id="txnErr" style="display:none;margin-top:8px;font-size:13px;color:#fc8080;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px"></div>
+      </div>
+
+      <button id="submitBtn" class="pay-submit-btn" onclick="doSubmit()">
+        ✅ To'lovni yuborish va tasdiqlash so'rash
+      </button>
+    </div>
+
+    <!-- Qadam 3 — Muvaffaqiyat -->
+    <div id="s3" style="display:none;text-align:center;padding:16px 0">
+      <div style="font-size:60px;margin-bottom:16px">✅</div>
+      <h3 style="font-family:var(--fhead);font-size:20px;font-weight:800;margin-bottom:10px">So'rovingiz qabul qilindi!</h3>
+      <p style="color:var(--txt2);font-size:14px;line-height:1.8;margin-bottom:24px">
+        Admin <strong>1-24 soat</strong> ichida to'lovingizni tekshirib,<br>
+        planningizni faollashtiradi.<br><br>
+        Savollar: <a href="https://t.me/tolibovmuhammad" target="_blank" style="color:var(--cyan)">@tolibovmuhammad</a>
+      </p>
+      <a href="/ai" class="pay-submit-btn" style="display:block;text-decoration:none">✦ AI Chat ga o'tish</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Ma'lumotlar ──────────────────────────────
+const PLAN_DATA = {
+  pro:     { icon:'⭐', name:'Pro plan',     price:'$9.99 / oy',  usd:'$9.99'  },
+  premium: { icon:'💎', name:'Premium plan', price:'$19.99 / oy', usd:'$19.99' },
+  ultra:   { icon:'🚀', name:'Ultra plan',   price:'$39.99 / oy', usd:'$39.99' }
+};
+
+let activePlan   = null;
+let activeMethod = null;
+
+const isLoggedIn = {{ 'true' if user else 'false' }};
+
+// ── Modal ochish ─────────────────────────────
+function openModal(plan) {
+  if (!isLoggedIn) {
+    window.location.href = '/register?next=/plans';
+    return;
+  }
+  activePlan = plan;
+  activeMethod = null;
+
+  const pd = PLAN_DATA[plan];
+  document.getElementById('mIcon').textContent  = pd.icon;
+  document.getElementById('mName').textContent  = pd.name;
+  document.getElementById('mPrice').textContent = pd.price;
+
+  showStep(1);
+  document.getElementById('payBg').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('payBg').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Tashqarisiga bossangiz yopiladi
+document.getElementById('payBg').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ── Qadam ko'rsatish ─────────────────────────
+function showStep(n) {
+  document.getElementById('s1').style.display = (n === 1) ? 'block' : 'none';
+  document.getElementById('s2').style.display = (n === 2) ? 'block' : 'none';
+  document.getElementById('s3').style.display = (n === 3) ? 'block' : 'none';
+}
+
+// ── Usul tanlash ─────────────────────────────
+function chooseMethod(method) {
+  activeMethod = method;
+  const pd  = PLAN_DATA[activePlan];
+  const amt = pd.usd;
+
+  // Sarlavha
+  const titles = {
+    payme: '📱 PayMe orqali to\'lash',
+    click: '⚡ Click orqali to\'lash',
+    bank:  '🏦 Bank o\'tkazmasi'
+  };
+  document.getElementById('s2Title').textContent = titles[method];
+
+  // Ko'rsatmalarni almashtirish
+  document.getElementById('inPayme').style.display = (method === 'payme') ? 'block' : 'none';
+  document.getElementById('inClick').style.display = (method === 'click') ? 'block' : 'none';
+  document.getElementById('inBank').style.display  = (method === 'bank')  ? 'block' : 'none';
+
+  // Summani to'ldirish
+  document.getElementById('pmAmt').textContent = amt;
+  document.getElementById('clAmt').textContent = amt;
+  document.getElementById('bkAmt').textContent = amt;
+
+  // Bank karta nusxa olish
+  document.getElementById('bciCard').onclick = function() {
+    navigator.clipboard.writeText('8600000000000000');
+    this.textContent = '✓ Nusxa olindi!';
+    setTimeout(() => { this.textContent = '8600 0000 0000 0000 📋'; }, 2000);
+  };
+
+  // Label
+  const labels = {
+    payme: 'PayMe chek raqami:',
+    click: 'Click tranzaksiya ID:',
+    bank:  'Bank o\'tkazma raqami:'
+  };
+  document.getElementById('txnLbl').textContent = labels[method];
+
+  // Input tozalash
+  document.getElementById('txnVal').value = '';
+  document.getElementById('txnErr').style.display = 'none';
+
+  // Yuborish tugmasi reset
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false;
+  btn.textContent = '✅ To\'lovni yuborish va tasdiqlash so\'rash';
+
+  showStep(2);
+}
+
+// ── To'lovni yuborish ────────────────────────
+async function doSubmit() {
+  const txnVal = document.getElementById('txnVal').value.trim();
+  const errEl  = document.getElementById('txnErr');
+  const btn    = document.getElementById('submitBtn');
+
+  // Validatsiya
+  errEl.style.display = 'none';
+  if (!txnVal || txnVal.length < 4) {
+    errEl.textContent = '⚠️ To\'lov ID raqamini kiriting (kamida 4 ta belgi)';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!activePlan || !activeMethod) {
+    errEl.textContent = '⚠️ Plan yoki usul tanlanmagan';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Yuborilmoqda...';
+
+  try {
+    const res = await fetch('/api/submit-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan:   activePlan,
+        method: activeMethod,
+        txn_id: txnVal
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      showStep(3);
+    } else {
+      errEl.textContent = '⚠️ ' + (data.error || 'Xatolik yuz berdi');
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '✅ To\'lovni yuborish va tasdiqlash so\'rash';
+    }
+  } catch (e) {
+    errEl.textContent = '⚠️ Tarmoq xatoligi: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '✅ To\'lovni yuborish va tasdiqlash so\'rash';
+  }
+}
+</script>
+{% endblock %}

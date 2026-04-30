@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — Rasm Yaratish{% endblock %}
+
+{% block content %}
+
+{% if not has_access %}
+<div class="locked-overlay">
+  <div class="locked-box">
+    <span class="locked-icon">🎨</span>
+    <h2>Premium yoki Ultra kerak</h2>
+    <p>Rasm yaratish (Imagine) funksiyasidan foydalanish uchun <strong>Premium</strong> yoki <strong>Ultra</strong> planga o'ting.<br><br>
+    Premium: <strong>$19.99/oy</strong> — barcha modellar + rasm yaratish<br>
+    Ultra: <strong>$39.99/oy</strong> — hammasi + slayd yaratish</p>
+    <div class="locked-btns">
+      <a href="/plans" class="locked-btn-primary">💎 Planni ko'rish va tanlash</a>
+      {% if not user %}
+      <a href="/register" class="locked-btn-secondary">Ro'yxatdan o'tish (bepul)</a>
+      {% else %}
+      <a href="/" class="locked-btn-secondary">← Bosh sahifaga</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+<section class="imagine-wrap">
+
+  <!-- Hero -->
+  <div class="imagine-hero">
+    <div class="page-eyebrow">🎨 AI Image Generator</div>
+    <h1>Rasm <span class="glow-text">yaratish</span></h1>
+    <p>Tasavvuringizdagi rasmni so'zlar bilan tasvirlang — AI bir zumda yaratib beradi</p>
+  </div>
+
+  <!-- Generator -->
+  <div class="imagine-card">
+
+    <!-- Prompt input -->
+    <div class="im-group">
+      <label class="im-label">📝 Rasm tavsifi</label>
+      <textarea
+        id="imPrompt"
+        class="im-textarea"
+        placeholder="Masalan: Tog'larda botayotgan quyosh, qizg'ish osmonda burgut uchmoqda, fotorealistik..."
+        rows="3"
+      ></textarea>
+    </div>
+
+    <!-- Options row -->
+    <div class="im-options">
+
+      <div class="im-group">
+        <label class="im-label">🎨 Uslub</label>
+        <select id="imStyle" class="im-select">
+          <option value="">Oddiy (auto)</option>
+          <option value="photorealistic">📷 Fotorealistik</option>
+          <option value="digital art">🖥️ Digital Art</option>
+          <option value="oil painting">🖼️ Moy bo'yoq</option>
+          <option value="watercolor">💧 Akvarel</option>
+          <option value="anime style">🌸 Anime</option>
+          <option value="3D render">🧊 3D Render</option>
+          <option value="pencil sketch">✏️ Qalam chizma</option>
+          <option value="cinematic">🎬 Kinematografik</option>
+          <option value="minimalist">⬜ Minimalist</option>
+          <option value="fantasy art">🐉 Fantaziya</option>
+        </select>
+      </div>
+
+      <div class="im-group">
+        <label class="im-label">📐 O'lcham</label>
+        <select id="imSize" class="im-select">
+          <option value="800x600">800×600 (Standart)</option>
+          <option value="1024x1024">1024×1024 (Kvadrat)</option>
+          <option value="1280x720">1280×720 (HD)</option>
+          <option value="768x1024">768×1024 (Portret)</option>
+          <option value="1024x768">1024×768 (Landscape)</option>
+        </select>
+      </div>
+
+      <div class="im-group">
+        <label class="im-label">🎲 Tasodifiy urug'</label>
+        <div class="seed-row">
+          <input type="number" id="imSeed" class="im-input" placeholder="Auto" min="0" max="999999">
+          <button class="seed-dice" onclick="randomSeed()" title="Tasodifiy">🎲</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Generate button -->
+    <button class="im-generate-btn" id="generateBtn" onclick="generateImage()">
+      <span id="btnText">✨ Rasm Yaratish</span>
+    </button>
+
+    <!-- Result area -->
+    <div class="im-result" id="imResult" style="display:none">
+      <div class="result-header">
+        <span class="result-label">✅ Rasm tayyor!</span>
+        <div class="result-actions">
+          <a id="downloadBtn" class="im-action-btn" download="novamind_image.jpg" target="_blank">⬇️ Yuklab olish</a>
+          <button class="im-action-btn" onclick="generateImage()">🔄 Qayta yaratish</button>
+          <button class="im-action-btn" onclick="copyPrompt()">📋 Promptni nusxalash</button>
+        </div>
+      </div>
+      <div class="im-img-wrap">
+        <img id="resultImg" class="result-img" alt="Generated image">
+      </div>
+      <div class="enhanced-prompt" id="enhancedPrompt"></div>
+    </div>
+
+    <!-- Loading -->
+    <div class="im-loading" id="imLoading" style="display:none">
+      <div class="loading-ring"></div>
+      <p>AI rasm yaratyapti...</p>
+      <small>Pollinations AI orqali · 5–15 soniya</small>
+    </div>
+
+    <!-- Error -->
+    <div class="im-error" id="imError" style="display:none">
+      <p>❌ <span id="errorText"></span></p>
+      <button class="im-action-btn" onclick="generateImage()">Qayta urinish</button>
+    </div>
+
+  </div>
+
+  <!-- Gallery hint -->
+  <div class="imagine-tips">
+    <h3>💡 Yaxshi rasm olish uchun maslahatlar</h3>
+    <div class="tips-row">
+      <div class="im-tip">
+        <span>✦</span>
+        <p>Aniq va batafsil tasvirlab bering: "mushuk" emas, "oq mushuk, ko'k ko'zli, yumshoq yoritishda"</p>
+      </div>
+      <div class="im-tip">
+        <span>✦</span>
+        <p>Uslub tanlang: "fotorealistik", "anime", "3D render" — har biri boshqacha natija beradi</p>
+      </div>
+      <div class="im-tip">
+        <span>✦</span>
+        <p>O'zbek tilida yozsangiz ham bo'ladi — AI avtomatik ingliz tiliga tarjima qiladi</p>
+      </div>
+      <div class="im-tip">
+        <span>✦</span>
+        <p>🎲 tugmasi bilan tasodifiy urug' o'rnating — har safar yangi variant chiqadi</p>
+      </div>
+    </div>
+
+    <!-- Quick prompts -->
+    <div class="quick-ex">
+      <span class="ex-label">Tezkor misollar:</span>
+      <button class="ex-btn" onclick="fillPrompt('Toshkent osmoni, zamonaviy binolar, kechki chiroqlar, kinematografik')">🌃 Toshkent kechasi</button>
+      <button class="ex-btn" onclick="fillPrompt('O\'zbek milliy kiyimidagi qiz, gul bog\'ida, akvarel uslubida')">🌸 Milliy kiyim</button>
+      <button class="ex-btn" onclick="fillPrompt('Kosmosda uchayotgan astronavt, yerga qarayapti, fotorealistik')">🚀 Kosmos</button>
+      <button class="ex-btn" onclick="fillPrompt('Qadimiy Samarqand, Registon maydoni, quyosh botishi')">🕌 Samarqand</button>
+      <button class="ex-btn" onclick="fillPrompt('Kibernetik bo\'ri, neon chiroqlar, kyberpank uslubida, 3D render')">🐺 Kyberpank</button>
+    </div>
+  </div>
+
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let enhancedPromptText = '';
+
+function randomSeed() {
+  document.getElementById('imSeed').value = Math.floor(Math.random() * 999999);
+}
+
+function fillPrompt(text) {
+  document.getElementById('imPrompt').value = text;
+  document.getElementById('imPrompt').focus();
+}
+
+function copyPrompt() {
+  if (enhancedPromptText) {
+    navigator.clipboard.writeText(enhancedPromptText).then(() => {
+      alert('Prompt nusxalandi!');
+    });
+  }
+}
+
+async function generateImage() {
+  const prompt = document.getElementById('imPrompt').value.trim();
+  if (!prompt) {
+    document.getElementById('imPrompt').focus();
+    document.getElementById('imPrompt').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('imPrompt').style.borderColor = '', 2000);
+    return;
+  }
+
+  const style  = document.getElementById('imStyle').value;
+  const size   = document.getElementById('imSize').value.split('x');
+  const width  = parseInt(size[0]);
+  const height = parseInt(size[1]);
+  const seed   = document.getElementById('imSeed').value || Math.floor(Math.random() * 999999);
+
+  // UI holati
+  document.getElementById('imResult').style.display  = 'none';
+  document.getElementById('imError').style.display   = 'none';
+  document.getElementById('imLoading').style.display = 'flex';
+  document.getElementById('generateBtn').disabled    = true;
+  document.getElementById('btnText').textContent     = '⏳ Yaratyapti...';
+
+  try {
+    const res  = await fetch('/api/imagine', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ prompt, style, width, height, seed: parseInt(seed) })
+    });
+    const data = await res.json();
+
+    if (data.image_url) {
+      enhancedPromptText = data.enhanced_prompt || data.original_prompt;
+
+      const img = document.getElementById('resultImg');
+      img.onload = () => {
+        document.getElementById('imLoading').style.display = 'none';
+        document.getElementById('imResult').style.display  = 'block';
+      };
+      img.onerror = () => {
+        document.getElementById('imLoading').style.display = 'none';
+        document.getElementById('imError').style.display   = 'block';
+        document.getElementById('errorText').textContent   = 'Rasm yuklanmadi. Qayta urinib ko\'ring.';
+      };
+
+      img.src = data.image_url;
+      document.getElementById('downloadBtn').href = data.image_url;
+      document.getElementById('enhancedPrompt').innerHTML =
+        `<strong>🤖 AI takomillashtirilgan prompt:</strong><br><em>${data.enhanced_prompt || ''}</em>`;
+    } else {
+      throw new Error(data.error || 'Noma\'lum xatolik');
+    }
+  } catch (e) {
+    document.getElementById('imLoading').style.display = 'none';
+    document.getElementById('imError').style.display   = 'block';
+    document.getElementById('errorText').textContent   = e.message;
+  }
+
+  document.getElementById('generateBtn').disabled = false;
+  document.getElementById('btnText').textContent  = '✨ Rasm Yaratish';
+}
+
+// Enter bilan yuborish
+document.getElementById('imPrompt').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) generateImage();
+});
+</script>
+
+<style>
+.imagine-wrap { max-width: 900px; margin: 0 auto; padding: 0 clamp(16px,5vw,60px) 80px; }
+.imagine-hero { text-align: center; padding: clamp(50px,8vw,90px) 0 40px; }
+.imagine-hero h1 { font-family: var(--fhead); font-size: clamp(32px,5vw,52px); font-weight: 800; letter-spacing: -1px; margin: 10px 0 14px; }
+.imagine-hero p { color: var(--txt2); font-size: 16px; }
+
+.imagine-card {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: var(--r3); padding: 32px;
+  backdrop-filter: blur(12px);
+  display: flex; flex-direction: column; gap: 22px;
+}
+
+.im-group { display: flex; flex-direction: column; gap: 8px; }
+.im-label { font-size: 12px; font-weight: 700; color: var(--txt2); text-transform: uppercase; letter-spacing: 1px; }
+
+.im-textarea {
+  width: 100%; background: var(--bg2); border: 1px solid var(--border);
+  color: var(--txt); padding: 14px 16px; border-radius: var(--r2);
+  font-family: var(--fbody); font-size: 14px; outline: none;
+  resize: vertical; min-height: 90px; transition: var(--t); line-height: 1.6;
+}
+.im-textarea:focus { border-color: var(--border2); box-shadow: 0 0 0 3px rgba(0,212,255,0.08); }
+
+.im-options { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+.im-select, .im-input {
+  width: 100%; background: var(--bg2); border: 1px solid var(--border);
+  color: var(--txt); padding: 10px 14px; border-radius: var(--r);
+  font-family: var(--fbody); font-size: 13.5px; outline: none;
+  transition: var(--t); -webkit-appearance: none;
+}
+.im-select:focus, .im-input:focus { border-color: var(--border2); }
+.im-select option { background: var(--bg2); }
+
+.seed-row { display: flex; gap: 8px; }
+.seed-row .im-input { flex: 1; }
+.seed-dice {
+  width: 40px; height: 40px; border-radius: var(--r); border: 1px solid var(--border);
+  background: var(--card); font-size: 18px; cursor: pointer; flex-shrink: 0;
+  transition: var(--t); display: flex; align-items: center; justify-content: center;
+}
+.seed-dice:hover { border-color: var(--border2); transform: rotate(20deg); }
+
+.im-generate-btn {
+  width: 100%; padding: 16px; border-radius: var(--r2); border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--cyan), var(--violet2));
+  color: white; font-family: var(--fhead); font-size: 16px; font-weight: 700;
+  letter-spacing: 0.5px; transition: var(--t);
+}
+.im-generate-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.3); }
+.im-generate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Loading */
+.im-loading {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 14px; padding: 40px; text-align: center;
+}
+.loading-ring {
+  width: 56px; height: 56px; border-radius: 50%;
+  border: 4px solid var(--border);
+  border-top-color: var(--cyan);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.im-loading p { font-size: 15px; font-weight: 600; }
+.im-loading small { color: var(--txt3); font-size: 12px; }
+
+/* Result */
+.im-result { display: flex; flex-direction: column; gap: 16px; }
+.result-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.result-label { font-weight: 700; color: var(--green); font-size: 14px; }
+.result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.im-action-btn {
+  padding: 7px 14px; border-radius: var(--r); border: 1px solid var(--border);
+  background: var(--card); color: var(--txt2); font-size: 12.5px;
+  cursor: pointer; transition: var(--t); text-decoration: none; font-family: var(--fbody);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.im-action-btn:hover { border-color: var(--border2); color: var(--cyan); }
+
+.im-img-wrap { border-radius: var(--r2); overflow: hidden; border: 1px solid var(--border); }
+.result-img { width: 100%; display: block; transition: opacity 0.5s; }
+
+.enhanced-prompt {
+  padding: 12px 16px; border-radius: var(--r);
+  background: rgba(0,212,255,0.04); border: 1px solid var(--border);
+  font-size: 12.5px; color: var(--txt2); line-height: 1.6;
+}
+
+/* Error */
+.im-error {
+  padding: 20px; border-radius: var(--r2); text-align: center;
+  background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.im-error p { color: var(--red); font-size: 14px; }
+
+/* Tips */
+.imagine-tips { margin-top: 40px; }
+.imagine-tips h3 { font-family: var(--fhead); font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+.tips-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; margin-bottom: 24px; }
+.im-tip {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 14px; border-radius: var(--r2);
+  background: var(--glass); border: 1px solid var(--border);
+}
+.im-tip span { color: var(--cyan); font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+.im-tip p { font-size: 13px; color: var(--txt2); line-height: 1.5; }
+
+.quick-ex { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ex-label { font-size: 12px; color: var(--txt3); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.ex-btn {
+  padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card); color: var(--txt2); font-size: 12.5px;
+  cursor: pointer; transition: var(--t); font-family: var(--fbody);
+}
+.ex-btn:hover { border-color: var(--border2); color: var(--cyan); background: rgba(0,212,255,0.05); }
+
+@media (max-width: 640px) {
+  .im-options { grid-template-columns: 1fr; }
+  .result-header { flex-direction: column; align-items: flex-start; }
+}
+</style>
+{% endblock %}

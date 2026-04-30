@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — To'lov Bekor Qilindi{% endblock %}
+{% block content %}
+<div class="pay-result-page">
+  <div class="pay-result-glow cancel-glow"></div>
+  <div class="pay-result-box">
+
+    <div class="pay-result-anim">
+      <div class="cancel-icon">↩️</div>
+    </div>
+
+    <h1>To'lov bekor qilindi</h1>
+    <p class="pay-result-desc">
+      Hech narsa hisobingizdan yechilmadi. Istalgan vaqt qaytib planlarni ko'rishingiz mumkin.
+    </p>
+
+    <div class="pay-result-btns">
+      <a href="/plans" class="prb-primary">💎 Planlarga qaytish</a>
+      <a href="/ai" class="prb-outline">✦ AI Chat (bepul)</a>
+    </div>
+
+    <div class="pay-cancel-help">
+      <h4>❓ Muammo bo'ldimi?</h4>
+      <p>Agar to'lov jarayonida muammo yuzaga kelgan bo'lsa, <a href="/contact">biz bilan bog'laning</a>.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — Aloqa{% endblock %}
+{% block content %}
+
+<section class="page-hero">
+  <div class="page-eyebrow">Contact</div>
+  <h1>Biz bilan <span class="glow-text">bog'laning</span></h1>
+  <p>Taklif, savol yoki hamkorlik uchun murojaat qiling</p>
+</section>
+
+<section class="contact-sec">
+  <div class="contact-grid">
+    <div class="contact-left">
+      <h3>Murojaat yo'llari</h3>
+      <div class="cinfo-list">
+        <a href="https://t.me/tolibovmuhammad" target="_blank" class="cinfo-item">
+          <div class="ci-ico">✈</div>
+          <div><b>Telegram</b><span>@tolibovmuhammad</span></div>
+        </a>
+        <a href="mailto:muhamtolibov@gmail.com" class="cinfo-item">
+          <div class="ci-ico">✉</div>
+          <div><b>Email</b><span>muhamtolibov@gmail.com</span></div>
+        </a>
+        <div class="cinfo-item">
+          <div class="ci-ico">📍</div>
+          <div><b>Joylashuv</b><span>Toshkent, O'zbekiston</span></div>
+        </div>
+        <div class="cinfo-item">
+          <div class="ci-ico">⏰</div>
+          <div><b>Ish vaqti</b><span>Du–Ju: 09:00–18:00</span></div>
+        </div>
+      </div>
+      <div class="contact-tip">
+        ⚡ Telegram orqali eng tez javob olasiz!
+      </div>
+    </div>
+
+    <div class="contact-right">
+      <h3>Xabar yuborish</h3>
+
+      <div id="successMsg" style="display:none" class="form-success">
+        <div class="success-circle">✓</div>
+        <h4 id="successText"></h4>
+        <button onclick="resetForm()" class="btn-outline-sm">Yana yuborish</button>
+      </div>
+
+      <div id="contactForm">
+        <div class="fgroup">
+          <label>Ismingiz *</label>
+          <input type="text" id="fName" placeholder="Ismingizni kiriting">
+        </div>
+        <div class="fgroup">
+          <label>Email *</label>
+          <input type="email" id="fEmail" placeholder="email@example.com">
+        </div>
+        <div class="fgroup">
+          <label>Mavzu</label>
+          <select id="fSubject">
+            <option value="">Mavzu tanlang</option>
+            <option>Umumiy savol</option>
+            <option>Xatolik haqida</option>
+            <option>Yangi funksiya taklifi</option>
+            <option>Hamkorlik</option>
+            <option>Boshqa</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label>Xabar *</label>
+          <textarea id="fMsg" rows="4" placeholder="Xabaringizni yozing..."></textarea>
+        </div>
+        <button class="btn-glow full" onclick="sendForm()">
+          <span class="btn-glow-inner">Xabar yuborish ✦</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block extra_scripts %}
+<script>
+async function sendForm(){
+  const n=document.getElementById('fName').value.trim();
+  const e=document.getElementById('fEmail').value.trim();
+  const m=document.getElementById('fMsg').value.trim();
+  if(!n||!e||!m){alert('Iltimos barcha * maydonlarni to\'ldiring');return;}
+  const btn=document.querySelector('.btn-glow.full');
+  btn.querySelector('.btn-glow-inner').textContent='Yuborilmoqda...';
+  const r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,email:e,message:m})});
+  const d=await r.json();
+  document.getElementById('contactForm').style.display='none';
+  document.getElementById('successText').textContent=d.message;
+  document.getElementById('successMsg').style.display='flex';
+}
+function resetForm(){
+  document.getElementById('contactForm').style.display='block';
+  document.getElementById('successMsg').style.display='none';
+  ['fName','fEmail','fMsg'].forEach(id=>document.getElementById(id).value='');
+}
+</script>
+{% endblock %}

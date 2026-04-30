@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>NovaMind — Admin Panel</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0f1a;color:#e2e8f0;font-family:system-ui,sans-serif;padding:30px 20px}
+    h1{font-size:22px;font-weight:800;margin-bottom:24px;color:#00d4ff}
+    .stats{display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+    .stat{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:16px 24px}
+    .stat strong{display:block;font-size:24px;color:#00d4ff}
+    .stat span{font-size:12px;color:#94a3b8}
+    table{width:100%;border-collapse:collapse;background:#111827;border-radius:12px;overflow:hidden}
+    th{background:#1f2937;padding:12px 16px;text-align:left;font-size:12px;color:#94a3b8;text-transform:uppercase}
+    td{padding:12px 16px;border-bottom:1px solid #1f2937;font-size:13px}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,0.02)}
+    .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+    .b-pending{background:rgba(245,158,11,0.15);color:#f59e0b}
+    .b-paid{background:rgba(16,185,129,0.15);color:#10b981}
+    .plan-pro{color:#f59e0b}.plan-premium{color:#00d4ff}.plan-ultra{color:#a78bfa}
+    .btn-confirm{padding:6px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,#00d4ff,#7c3aed);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+    .btn-confirm:hover{opacity:0.85}
+    .btn-confirm:disabled{opacity:0.4;cursor:default}
+    .copy{cursor:pointer;color:#00d4ff;font-size:12px}
+    .copy:hover{text-decoration:underline}
+    .empty{text-align:center;padding:60px;color:#4b5563}
+    h2{font-size:16px;font-weight:700;margin:32px 0 16px;color:#94a3b8}
+  </style>
+</head>
+<body>
+  <h1>🛡️ NovaMind Admin Panel</h1>
+
+  {% set pending = payments|selectattr('status','eq','pending')|list %}
+  {% set paid    = payments|selectattr('status','eq','paid')|list %}
+
+  <div class="stats">
+    <div class="stat"><strong>{{ pending|length }}</strong><span>Kutilayotgan to'lovlar</span></div>
+    <div class="stat"><strong>{{ paid|length }}</strong><span>Tasdiqlangan to'lovlar</span></div>
+    <div class="stat"><strong>{{ payments|length }}</strong><span>Jami so'rovlar</span></div>
+  </div>
+
+  <h2>⏳ Kutilayotgan to'lovlar</h2>
+  {% if pending %}
+  <table>
+    <thead><tr>
+      <th>#ID</th><th>Foydalanuvchi</th><th>Plan</th><th>Summa</th>
+      <th>Usul</th><th>Tranzaksiya ID</th><th>Vaqt</th><th>Amal</th>
+    </tr></thead>
+    <tbody>
+    {% for p in pending %}
+    <tr id="row-{{ p.id }}">
+      <td>#{{ p.id }}</td>
+      <td>
+        <strong>{{ p.username }}</strong><br>
+        <span style="color:#64748b;font-size:11px">{{ p.email }}</span>
+      </td>
+      <td class="plan-{{ p.plan }}">
+        {% if p.plan=='pro' %}⭐ Pro
+        {% elif p.plan=='premium' %}💎 Premium
+        {% elif p.plan=='ultra' %}🚀 Ultra{% endif %}
+      </td>
+      <td><strong>${{ p.amount }}</strong></td>
+      <td>
+        {% if p.method=='payme' %}📱 PayMe
+        {% elif p.method=='click' %}⚡ Click
+        {% else %}🏦 Bank{% endif %}
+      </td>
+      <td>
+        <span class="copy" onclick="navigator.clipboard.writeText('{{ p.txn_id }}');this.textContent='✓ Nusxa!'">
+          {{ p.txn_id }}
+        </span>
+      </td>
+      <td style="color:#64748b;font-size:11px">{{ p.created[:16] }}</td>
+      <td>
+        <button class="btn-confirm" id="btn-{{ p.id }}" onclick="confirm_payment({{ p.id }})">
+          ✅ Tasdiqlash
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">✅ Barcha to'lovlar tasdiqlangan</div>
+  {% endif %}
+
+  <h2>✅ Tasdiqlangan to'lovlar</h2>
+  {% if paid %}
+  <table>
+    <thead><tr>
+      <th>#ID</th><th>Foydalanuvchi</th><th>Plan</th><th>Summa</th>
+      <th>Usul</th><th>Tranzaksiya ID</th><th>Vaqt</th>
+    </tr></thead>
+    <tbody>
+    {% for p in paid %}
+    <tr>
+      <td>#{{ p.id }}</td>
+      <td><strong>{{ p.username }}</strong></td>
+      <td class="plan-{{ p.plan }}">{{ p.plan }}</td>
+      <td>${{ p.amount }}</td>
+      <td>{{ p.method }}</td>
+      <td style="font-size:11px;color:#64748b">{{ p.txn_id }}</td>
+      <td style="color:#64748b;font-size:11px">{{ p.created[:16] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">Hali tasdiqlangan to'lovlar yo'q</div>
+  {% endif %}
+
+<script>
+async function confirm_payment(id){
+  const btn = document.getElementById('btn-'+id);
+  if(!confirm('Bu to\'lovni tasdiqlaysizmi?')) return;
+  btn.disabled=true; btn.textContent='...';
+  const res  = await fetch('/api/admin/confirm-payment',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({secret:'{{ secret }}', request_id:id})
+  });
+  const data = await res.json();
+  if(data.ok){
+    const row = document.getElementById('row-'+id);
+    row.style.opacity='0.4';
+    btn.textContent='✓ Tasdiqlandi';
+    btn.style.background='#10b981';
+    setTimeout(()=>location.reload(),1500);
+  } else {
+    alert('Xatolik: '+(data.error||''));
+    btn.disabled=false; btn.textContent='✅ Tasdiqlash';
+  }
+}
+</script>
+</body>
+</html>

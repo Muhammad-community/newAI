@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — Kelajak bugun boshlanadi{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span class="live-badge"><i class="live-dot"></i> LIVE · Groq API bilan ishlayapti</span>
+  </div>
+  <h1 class="hero-title">
+    <span class="title-line reveal" style="--d:0.1s">Sun'iy Intellekt</span>
+    <span class="title-line title-glow reveal" style="--d:0.25s">NovaMind AI</span>
+    <span class="title-line reveal" style="--d:0.4s">bilan birga</span>
+  </h1>
+  <p class="hero-sub reveal" style="--d:0.55s">
+    O'zbek, Rus va Ingliz tillarida tezkor javob. Kod yozadi, tushuntiradi,<br>
+    ijodiy kontent yaratadi — hammasi bir joyda.
+  </p>
+  <div class="hero-btns reveal" style="--d:0.65s">
+    <a href="/ai" class="btn-glow">
+      <span class="btn-glow-inner">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        AI Chat boshlash
+      </span>
+    </a>
+    <a href="/about" class="btn-outline">Loyiha haqida →</a>
+  </div>
+
+  <div class="hero-cards reveal" style="--d:0.8s">
+    <div class="hcard"><span class="hcard-n">4+</span><span class="hcard-l">AI Model</span></div>
+    <div class="hcard"><span class="hcard-n">3</span><span class="hcard-l">Til</span></div>
+    <div class="hcard"><span class="hcard-n">∞</span><span class="hcard-l">Savollar</span></div>
+    <div class="hcard"><span class="hcard-n">24/7</span><span class="hcard-l">Doimo tayyor</span></div>
+    <div class="hcard"><span class="hcard-n"><0.5s</span><span class="hcard-l">Javob vaqti</span></div>
+  </div>
+
+  <!-- Floating AI visual -->
+  <div class="hero-visual">
+    <div class="orbit-ring r1"><div class="orbit-dot"></div></div>
+    <div class="orbit-ring r2"><div class="orbit-dot"></div></div>
+    <div class="orbit-ring r3"><div class="orbit-dot"></div></div>
+    <div class="orbit-core">
+      <svg viewBox="0 0 40 40" width="48" height="48">
+        <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="20" y="26" text-anchor="middle" font-size="16" font-weight="bold" fill="currentColor">N</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features-sec">
+  <div class="sec-label">Imkoniyatlar</div>
+  <h2 class="sec-title">Nima qila oladi?</h2>
+  <div class="features-grid">
+    {% set feats = [
+      ("🧠","Aqlli tahlil","Murakkab savollarni chuqur o'rganib, eng to'g'ri javob beradi"),
+      ("💻","Kod yozish","Python, JS, HTML, SQL va 50+ tilda kod yozadi, tuzatadi, tushuntiradi"),
+      ("✍️","Kontent yaratish","Maqola, post, xat, rezyume — har qanday matn"),
+      ("🌐","Ko'p tilli","O'zbek, Rus, Ingliz va boshqa tillarda muloqot"),
+      ("📐","Matematik","Tenglamalar, statistika, formula hisob-kitoblari"),
+      ("🎨","Ijodiy yozuv","Qissa, she'r, ssenariy va boshqa ijodiy kontent"),
+      ("🔎","Tahlil","Matnlar, kodlar, hujjatlar tahlili va xulosa"),
+      ("⚡","Tezkor","Groq superkompyuteri: sekundiga 800+ token"),
+    ] %}
+    {% for icon, title, desc in feats %}
+    <div class="feat-card">
+      <div class="feat-icon">{{icon}}</div>
+      <h3>{{title}}</h3>
+      <p>{{desc}}</p>
+      <div class="feat-shine"></div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Models -->
+<section class="models-sec">
+  <div class="sec-label">Modellar</div>
+  <h2 class="sec-title">4 ta qudratli AI</h2>
+  <div class="models-grid">
+    <div class="model-card featured">
+      <div class="model-badge">Tavsiya</div>
+      <div class="model-icon">🦙</div>
+      <h3>LLaMA 3.3 70B</h3>
+      <p>Meta'ning eng yangi va kuchli modeli. Universal vazifalar uchun ideal.</p>
+      <a href="/ai" class="btn-sm-glow">Sinab ko'rish →</a>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">⚡</div>
+      <h3>LLaMA 3 8B</h3>
+      <p>Eng tez model. Oddiy savollar uchun milisekund javob.</p>
+      <a href="/ai" class="btn-sm-outline">Sinab ko'rish →</a>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">🌀</div>
+      <h3>Mixtral 8x7B</h3>
+      <p>Mistral AI'dan. Ko'p tilli va kod yozishda ajoyib.</p>
+      <a href="/ai" class="btn-sm-outline">Sinab ko'rish →</a>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">💎</div>
+      <h3>Gemma 2 9B</h3>
+      <p>Google'dan. Mantiqiy fikrlash va aniq javoblarda kuchli.</p>
+      <a href="/ai" class="btn-sm-outline">Sinab ko'rish →</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="cta-box">
+    <div class="cta-glow"></div>
+    <h2>Bugun bepul sinab ko'ring</h2>
+    <p>Ro'yxatdan o'tish shart emas. Shunchaki bosing va boshlang.</p>
+    <a href="/ai" class="btn-glow">
+      <span class="btn-glow-inner">AI Chat ga o'tish ✦</span>
+    </a>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,867 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — Slayd Yaratish{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PptxGenJS/3.12.0/pptxgen.bundled.js"></script>
+{% endblock %}
+
+{% block content %}
+
+{% if not has_access %}
+<div class="locked-overlay">
+  <div class="locked-box">
+    <span class="locked-icon">🗂️</span>
+    <h2>Ultra plan kerak</h2>
+    <p>Slayd yaratish funksiyasidan foydalanish uchun <strong>Ultra</strong> planga o'ting.<br><br>
+    Ultra: <strong>$39.99/oy</strong> — barcha modellar + rasm yaratish + slayd yaratish</p>
+    <div class="locked-btns">
+      <a href="/plans" class="locked-btn-primary">🚀 Ultra planga o'tish</a>
+      {% if not user %}
+      <a href="/register" class="locked-btn-secondary">Ro'yxatdan o'tish (bepul)</a>
+      {% else %}
+      <a href="/" class="locked-btn-secondary">← Bosh sahifaga</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+<div class="slides-page">
+
+  <!-- LEFT: Form -->
+  <div class="slides-panel">
+    <div class="panel-header">
+      <div class="page-eyebrow">AI Slide Maker</div>
+      <h1>Slayd <span class="glow-text">yaratish</span></h1>
+      <p>Mavzuni kiriting — AI to'liq prezentatsiya yaratadi</p>
+    </div>
+
+    <div class="slides-form">
+      <div class="sf-group">
+        <label class="sf-label">📌 Mavzu *</label>
+        <textarea id="sfTopic" class="sf-textarea" rows="3"
+          placeholder="Masalan: Sun'iy intellekt va kelajagi&#10;Biznes-reja: onlayn do'kon&#10;Python dasturlash asoslari"></textarea>
+      </div>
+
+      <div class="sf-row">
+        <div class="sf-group">
+          <label class="sf-label">🌐 Til</label>
+          <select id="sfLang" class="sf-select">
+            <option value="uz">🇺🇿 O'zbek</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+        </div>
+        <div class="sf-group">
+          <label class="sf-label">📊 Slaydlar</label>
+          <select id="sfCount" class="sf-select">
+            <option value="5">5 ta</option>
+            <option value="8" selected>8 ta</option>
+            <option value="10">10 ta</option>
+            <option value="12">12 ta</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sf-row">
+        <div class="sf-group">
+          <label class="sf-label">🎨 Uslub</label>
+          <select id="sfStyle" class="sf-select">
+            <option value="professional">💼 Professional</option>
+            <option value="creative">🎨 Ijodiy</option>
+            <option value="educational">📚 Ta'limiy</option>
+            <option value="business">📈 Biznes</option>
+            <option value="startup">🚀 Startup</option>
+          </select>
+        </div>
+        <div class="sf-group">
+          <label class="sf-label">🎨 Rang sxemasi</label>
+          <select id="sfTheme" class="sf-select">
+            <option value="dark_blue">🌊 Ko'k</option>
+            <option value="purple">💜 Binafsha</option>
+            <option value="green">💚 Yashil</option>
+            <option value="red">❤️ Qizil</option>
+            <option value="orange">🧡 To'q sariq</option>
+            <option value="dark">🖤 Qora</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sf-group">
+        <label class="sf-label">👥 Auditoriya</label>
+        <input type="text" id="sfAudience" class="sf-input" placeholder="Talabalar, biznesmenlar...">
+      </div>
+
+      <!-- Image option -->
+      <div class="sf-toggle-wrap">
+        <label class="sf-toggle">
+          <input type="checkbox" id="sfImages">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">🖼️ Har bir slaydga AI rasm qo'shish</span>
+        </label>
+        <p class="sf-toggle-note">Pollinations AI orqali. Yuklab olish vaqti biroz uzayadi.</p>
+      </div>
+
+      <button class="sf-btn" id="sfBtn" onclick="generateSlides()">
+        <span id="sfBtnText">✨ Prezentatsiya yaratish</span>
+      </button>
+
+      <!-- Quick topics -->
+      <div class="sf-examples">
+        <span class="sf-ex-label">Tezkor misollar:</span>
+        <button class="sf-ex" onclick="setTopic('Sun\'iy intellekt va machine learning asoslari')">🤖 AI</button>
+        <button class="sf-ex" onclick="setTopic('Startup biznesni boshlash qo\'llanmasi')">🚀 Startup</button>
+        <button class="sf-ex" onclick="setTopic('Python dasturlash tili asoslari')">🐍 Python</button>
+        <button class="sf-ex" onclick="setTopic('Marketing strategiyasi va SMM')">📱 Marketing</button>
+        <button class="sf-ex" onclick="setTopic('Iqlim o\'zgarishi va ekologiya')">🌍 Ekologiya</button>
+        <button class="sf-ex" onclick="setTopic('Sog\'lom turmush tarzi va sport')">💪 Sport</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Preview -->
+  <div class="slides-preview" id="slidesPreview">
+
+    <div class="preview-empty" id="previewEmpty">
+      <div style="font-size:52px;opacity:.25">🗂️</div>
+      <h3>Prezentatsiya bu yerda ko'rinadi</h3>
+      <p>Mavzu kiriting va yaratish tugmasini bosing</p>
+    </div>
+
+    <div class="preview-loading" id="previewLoading" style="display:none">
+      <div class="loading-orbit">
+        <div class="lo-ring"></div>
+        <div class="lo-core">⬡</div>
+      </div>
+      <h3 id="loadingTitle">Yaratyapti...</h3>
+      <p id="loadingStatus">Mazmun tayyorlanmoqda</p>
+      <div class="loading-bar-wrap"><div class="loading-bar" id="loadingBar"></div></div>
+    </div>
+
+    <div id="slidesResult" style="display:none">
+      <!-- Toolbar -->
+      <div class="slides-toolbar">
+        <div class="toolbar-info">
+          <span class="slide-count-badge" id="slideBadge">0 slayd</span>
+          <span class="slide-title-text" id="slideMainTitle"></span>
+        </div>
+        <div class="toolbar-actions">
+          <button class="tb-btn" onclick="prevSlide()">←</button>
+          <span class="slide-nav" id="slideNav">1/1</span>
+          <button class="tb-btn" onclick="nextSlide()">→</button>
+          <button class="tb-btn tb-download" id="downloadBtn" onclick="downloadPptx()">⬇️ PPTX Yuklab olish</button>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="slide-canvas-wrap">
+        <div class="slide-canvas" id="slideCanvas"></div>
+      </div>
+
+      <!-- Thumbs -->
+      <div class="slide-thumbs" id="slideThumbs"></div>
+
+      <!-- Notes -->
+      <div class="notes-bar">
+        <button class="notes-toggle-btn" onclick="toggleNotes()">📝 Spiker izohi</button>
+        <div class="notes-content" id="notesContent" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── State ─────────────────────────────────────
+var slidesData   = null;
+var currentIdx   = 0;
+var slideImages  = {}; // idx -> base64 dataUrl
+var useImages    = false;
+
+// ── Themes ────────────────────────────────────
+var THEMES = {
+  dark_blue: { bg:'#0a1628', card:'#0d1f3c', accent:'#00d4ff', text:'#e8edf5', sub:'#8b9ab0' },
+  purple:    { bg:'#0d0a1e', card:'#1a1035', accent:'#a855f7', text:'#e8edf5', sub:'#9b8fc0' },
+  green:     { bg:'#0a1a12', card:'#0d2018', accent:'#10b981', text:'#e8edf5', sub:'#7ab89a' },
+  red:       { bg:'#1a0a0a', card:'#2a1010', accent:'#ef4444', text:'#e8edf5', sub:'#b87a7a' },
+  orange:    { bg:'#1a1008', card:'#2a1c08', accent:'#f59e0b', text:'#e8edf5', sub:'#c0a060' },
+  dark:      { bg:'#0a0a0a', card:'#1a1a1a', accent:'#ffffff', text:'#e8edf5', sub:'#888888' },
+};
+
+function getTheme() { return THEMES[document.getElementById('sfTheme').value] || THEMES.dark_blue; }
+function esc(s)     { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function setTopic(t){ document.getElementById('sfTopic').value = t; }
+
+document.getElementById('sfTheme').addEventListener('change', function() {
+  if (slidesData) { buildThumbs(); renderSlide(currentIdx); }
+});
+
+// ── Progress bar helper ────────────────────────
+function setProgress(pct, status) {
+  document.getElementById('loadingStatus').textContent = status;
+  document.getElementById('loadingBar').style.width    = pct + '%';
+}
+
+// ── Fetch image as base64 ─────────────────────
+async function fetchImageBase64(prompt) {
+  var encoded = encodeURIComponent(prompt + ', professional presentation slide image, clean minimal');
+  var seed    = Math.floor(Math.random() * 999999);
+  var url     = 'https://image.pollinations.ai/prompt/' + encoded
+    + '?width=800&height=450&seed=' + seed + '&nologo=true';
+  try {
+    var res  = await fetch(url);
+    var blob = await res.blob();
+    return await new Promise(function(resolve) {
+      var reader = new FileReader();
+      reader.onload = function(e) { resolve(e.target.result); };
+      reader.readAsDataURL(blob);
+    });
+  } catch(e) { return null; }
+}
+
+// ── Generate ───────────────────────────────────
+async function generateSlides() {
+  var topic = document.getElementById('sfTopic').value.trim();
+  if (!topic) {
+    document.getElementById('sfTopic').style.borderColor = 'var(--red)';
+    setTimeout(function(){ document.getElementById('sfTopic').style.borderColor=''; }, 2000);
+    document.getElementById('sfTopic').focus();
+    return;
+  }
+
+  useImages = document.getElementById('sfImages').checked;
+  slideImages = {};
+
+  document.getElementById('previewEmpty').style.display   = 'none';
+  document.getElementById('previewLoading').style.display = 'flex';
+  document.getElementById('slidesResult').style.display   = 'none';
+  document.getElementById('sfBtn').disabled               = true;
+  document.getElementById('sfBtnText').textContent        = '⏳ Yaratyapti...';
+  document.getElementById('loadingBar').style.width       = '0%';
+
+  setProgress(10, 'Mavzu tahlil qilinmoqda...');
+
+  try {
+    setProgress(25, 'AI slayd tuzilmasini yaratyapti...');
+
+    var res  = await fetch('/api/slides', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        topic,
+        count:    parseInt(document.getElementById('sfCount').value),
+        lang:     document.getElementById('sfLang').value,
+        style:    document.getElementById('sfStyle').value,
+        audience: document.getElementById('sfAudience').value.trim(),
+        extra:    ''
+      })
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    slidesData = data.data;
+    currentIdx = 0;
+
+    setProgress(60, 'Slaydlar tayyorlanmoqda...');
+
+    // Rasmlar yuklanishi
+    if (useImages && slidesData.slides) {
+      setProgress(65, 'Rasmlar yuklanmoqda (bu biroz vaqt oladi)...');
+      var total = slidesData.slides.length;
+      for (var i = 0; i < total; i++) {
+        var sl        = slidesData.slides[i];
+        var imgPrompt = (sl.title || topic) + ', ' + topic;
+        var b64       = await fetchImageBase64(imgPrompt);
+        if (b64) slideImages[i] = b64;
+        setProgress(65 + Math.round((i+1)/total * 30), 'Rasm ' + (i+1) + '/' + total + ' yuklanmoqda...');
+      }
+    }
+
+    setProgress(100, 'Tayyor!');
+    await new Promise(function(r){ setTimeout(r, 300); });
+
+    document.getElementById('previewLoading').style.display = 'none';
+    document.getElementById('slidesResult').style.display   = 'flex';
+    document.getElementById('slideBadge').textContent       = slidesData.slides.length + ' slayd';
+    document.getElementById('slideMainTitle').textContent   = slidesData.title || '';
+
+    buildThumbs();
+    renderSlide(0);
+
+  } catch(e) {
+    document.getElementById('previewLoading').style.display = 'none';
+    document.getElementById('previewEmpty').style.display   = 'flex';
+    document.getElementById('previewEmpty').innerHTML =
+      '<div style="font-size:40px">⚠️</div>'
+      + '<h3>Xatolik</h3><p style="color:var(--red)">' + esc(e.message) + '</p>'
+      + '<button class="sf-btn" style="margin-top:16px;max-width:200px" onclick="generateSlides()">Qayta urinish</button>';
+  }
+
+  document.getElementById('sfBtn').disabled        = false;
+  document.getElementById('sfBtnText').textContent = '✨ Prezentatsiya yaratish';
+}
+
+// ── Render slide (HTML preview) ────────────────
+function renderSlide(idx) {
+  if (!slidesData || !slidesData.slides) return;
+  currentIdx = idx;
+  var slide  = slidesData.slides[idx];
+  var t      = getTheme();
+  var canvas = document.getElementById('slideCanvas');
+
+  canvas.style.background = t.bg;
+  canvas.innerHTML        = buildSlideHTML(slide, t, idx);
+
+  document.getElementById('slideNav').textContent = (idx+1) + ' / ' + slidesData.slides.length;
+
+  var nc = document.getElementById('notesContent');
+  nc.textContent = slide.notes || '(Izoh yo\'q)';
+
+  document.querySelectorAll('.thumb-item').forEach(function(el, i) {
+    el.classList.toggle('active', i === idx);
+    if (i === idx) el.scrollIntoView({ block:'nearest', inline:'center', behavior:'smooth' });
+  });
+}
+
+function buildSlideHTML(slide, t, idx) {
+  var type   = slide.type || 'content';
+  var imgTag = '';
+  if (useImages && slideImages[idx]) {
+    imgTag = '<div class="sl-img-panel">'
+      + '<img src="' + slideImages[idx] + '" class="sl-img" alt="slide image">'
+      + '</div>';
+  }
+  var hasImg = imgTag !== '';
+
+  // ── Title slide ──
+  if (type === 'title') {
+    return '<div class="sl-slide" style="background:'+t.bg+'">'
+      + '<div class="sl-top-bar" style="background:'+t.accent+'"></div>'
+      + '<div class="sl-title-body">'
+        + (hasImg ? '<div class="sl-title-img">'+imgTag+'</div>' : '')
+        + '<div class="sl-title-text-block">'
+          + '<div class="sl-eyebrow" style="color:'+t.accent+'">NovaMind AI · Prezentatsiya</div>'
+          + '<h1 class="sl-big-title" style="color:'+t.text+'">'+esc(slide.title||'')+'</h1>'
+          + (slide.subtitle ? '<p class="sl-big-sub" style="color:'+t.sub+'">'+esc(slide.subtitle)+'</p>' : '')
+          + '<div class="sl-hr" style="background:'+t.accent+'"></div>'
+          + '<p class="sl-author" style="color:'+t.sub+'">'+(slidesData.author||'NovaMind AI')+'</p>'
+        + '</div>'
+      + '</div>'
+      + '<div class="sl-deco" style="background:'+t.accent+'15;border:1px solid '+t.accent+'25"></div>'
+    + '</div>';
+  }
+
+  // ── End slide ──
+  if (type === 'end') {
+    return '<div class="sl-slide sl-center" style="background:'+t.bg+'">'
+      + '<div class="sl-top-bar" style="background:'+t.accent+'"></div>'
+      + '<div class="sl-glow" style="background:radial-gradient(circle,'+t.accent+'20,transparent 60%)"></div>'
+      + (hasImg ? '<div class="sl-end-img">'+imgTag+'</div>' : '')
+      + '<div class="sl-end-body">'
+        + '<div class="sl-end-icon" style="border-color:'+t.accent+';color:'+t.accent+'">⬡</div>'
+        + '<h1 class="sl-big-title" style="color:'+t.text+'">'+esc(slide.title||'Xulosa')+'</h1>'
+        + (slide.message ? '<p class="sl-big-sub" style="color:'+t.sub+'">'+esc(slide.message)+'</p>' : '')
+        + (slide.contact ? '<div class="sl-contact-chip" style="border-color:'+t.accent+'55;color:'+t.accent+'">'+esc(slide.contact)+'</div>' : '')
+        + '<p class="sl-powered" style="color:'+t.sub+'55">Powered by NovaMind AI</p>'
+      + '</div>'
+    + '</div>';
+  }
+
+  // ── Quote slide ──
+  if (type === 'quote') {
+    return '<div class="sl-slide" style="background:'+t.bg+'">'
+      + '<div class="sl-top-bar" style="background:'+t.accent+'"></div>'
+      + '<div class="sl-content-body' + (hasImg?' sl-has-img':'') + '">'
+        + '<div class="sl-header">'
+          + '<span class="sl-num" style="color:'+t.accent+'">'+String(currentIdx+1).padStart(2,'0')+'</span>'
+          + '<div>'
+            + '<h2 class="sl-title" style="color:'+t.text+'">'+esc(slide.title||'')+'</h2>'
+            + '<div class="sl-underline" style="background:'+t.accent+'"></div>'
+          + '</div>'
+        + '</div>'
+        + '<div class="sl-quote-box" style="border-left-color:'+t.accent+';background:'+t.accent+'0a">'
+          + '<div class="sl-qq" style="color:'+t.accent+'">"</div>'
+          + '<p class="sl-quote-txt" style="color:'+t.text+'">'+esc(slide.quote||'')+'</p>'
+          + (slide.author ? '<div class="sl-quote-auth" style="color:'+t.accent+'">— '+esc(slide.author)+'</div>' : '')
+        + '</div>'
+        + (hasImg ? imgTag : '')
+      + '</div>'
+    + '</div>';
+  }
+
+  // ── Stats slide ──
+  if (type === 'stats') {
+    var stats = slide.stats || [];
+    return '<div class="sl-slide" style="background:'+t.bg+'">'
+      + '<div class="sl-top-bar" style="background:'+t.accent+'"></div>'
+      + '<div class="sl-content-body' + (hasImg?' sl-has-img':'') + '">'
+        + '<div class="sl-header">'
+          + '<span class="sl-num" style="color:'+t.accent+'">'+String(currentIdx+1).padStart(2,'0')+'</span>'
+          + '<div>'
+            + '<h2 class="sl-title" style="color:'+t.text+'">'+esc(slide.title||'')+'</h2>'
+            + '<div class="sl-underline" style="background:'+t.accent+'"></div>'
+          + '</div>'
+        + '</div>'
+        + '<div class="sl-stats-row">'
+          + stats.map(function(s){
+              return '<div class="sl-stat-box" style="border-color:'+t.accent+'30;background:'+t.accent+'0a">'
+                + '<div class="sl-stat-val" style="color:'+t.accent+'">'+esc(s.value||'')+'</div>'
+                + '<div class="sl-stat-lbl" style="color:'+t.sub+'">'+esc(s.label||'')+'</div>'
+              + '</div>';
+            }).join('')
+        + '</div>'
+        + (hasImg ? imgTag : '')
+      + '</div>'
+    + '</div>';
+  }
+
+  // ── Two column slide ──
+  if (type === 'two_col') {
+    var lp = slide.left_points  || [];
+    var rp = slide.right_points || [];
+    return '<div class="sl-slide" style="background:'+t.bg+'">'
+      + '<div class="sl-top-bar" style="background:'+t.accent+'"></div>'
+      + '<div class="sl-content-body' + (hasImg?' sl-has-img':'') + '">'
+        + '<div class="sl-header">'
+          + '<span class="sl-num" style="color:'+t.accent+'">'+String(currentIdx+1).padStart(2,'0')+'</span>'
+          + '<div>'
+            + '<h2 class="sl-title" style="color:'+t.text+'">'+esc(slide.title||'')+'</h2>'
+            + '<div class="sl-underline" style="background:'+t.accent+'"></div>'
+          + '</div>'
+        + '</div>'
+        + '<div class="sl-cols">'
+          + ['left','right'].map(function(side){
+              var colTitle  = side==='left' ? (slide.left_title||'')  : (slide.right_title||'');
+              var colPoints = side==='left' ? lp : rp;
+              return '<div class="sl-col" style="border-color:'+t.accent+'25;background:'+t.accent+'08">'
+                + '<div class="sl-col-h" style="color:'+t.accent+'">'+esc(colTitle)+'</div>'
+                + colPoints.map(function(p){
+                    return '<div class="sl-pt" style="color:'+t.sub+'">'
+                      +'<span style="color:'+t.accent+';margin-right:6px">▸</span>'+esc(p)+'</div>';
+                  }).join('')
+              + '</div>';
+            }).join('')
+        + '</div>'
+        + (hasImg ? imgTag : '')
+      + '</div>'
+    + '</div>';
+  }
+
+  // ── Default: content ──
+  var points = slide.points || [];
+  var mainW  = hasImg ? 'sl-content-body sl-has-img' : 'sl-content-body';
+  return '<div class="sl-slide" style="background:'+t.bg+'">'
+    + '<div class="sl-top-bar" style="background:'+t.accent+'"></div>'
+    + '<div class="'+mainW+'">'
+      + '<div class="sl-left-col">'
+        + '<div class="sl-header">'
+          + '<span class="sl-num" style="color:'+t.accent+'">'+String(currentIdx+1).padStart(2,'0')+'</span>'
+          + '<div>'
+            + '<h2 class="sl-title" style="color:'+t.text+'">'+esc(slide.title||'')+'</h2>'
+            + '<div class="sl-underline" style="background:'+t.accent+'"></div>'
+          + '</div>'
+        + '</div>'
+        + '<div class="sl-points-list">'
+          + points.map(function(p, i){
+              return '<div class="sl-pt-row" style="animation-delay:'+(i*0.08)+'s">'
+                + '<div class="sl-pt-dot" style="background:'+t.accent+'"></div>'
+                + '<span class="sl-pt-txt" style="color:'+t.sub+'">'+esc(p)+'</span>'
+              + '</div>';
+            }).join('')
+        + '</div>'
+      + '</div>'
+      + (hasImg ? '<div class="sl-right-img">'+imgTag+'</div>' : '')
+    + '</div>'
+  + '</div>';
+}
+
+// ── Thumbnails ─────────────────────────────────
+function buildThumbs() {
+  if (!slidesData) return;
+  var t    = getTheme();
+  var wrap = document.getElementById('slideThumbs');
+  wrap.innerHTML = slidesData.slides.map(function(sl, i) {
+    var hasImg = useImages && slideImages[i] ? true : false;
+    return '<div class="thumb-item '+(i===0?'active':'')+'" onclick="renderSlide('+i+')"'
+      + ' style="background:'+t.bg+';border-color:'+(i===0?t.accent:'transparent')+'">'
+      + (hasImg
+          ? '<img src="'+slideImages[i]+'" class="thumb-img" alt="thumb">'
+          : '<div class="thumb-bg" style="background:'+t.card+'"></div>')
+      + '<div class="thumb-footer" style="color:'+t.accent+'">'+(i+1)+'</div>'
+      + '<div class="thumb-lbl">'+esc((sl.title||'').slice(0,16))+'</div>'
+    + '</div>';
+  }).join('');
+}
+
+// ── Navigation ─────────────────────────────────
+function prevSlide() { if(currentIdx>0) renderSlide(currentIdx-1); }
+function nextSlide() { if(slidesData && currentIdx<slidesData.slides.length-1) renderSlide(currentIdx+1); }
+
+document.addEventListener('keydown', function(e) {
+  if (!slidesData) return;
+  if (e.key==='ArrowRight'||e.key==='ArrowDown') { e.preventDefault(); nextSlide(); }
+  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   { e.preventDefault(); prevSlide(); }
+});
+
+function toggleNotes() {
+  var nc = document.getElementById('notesContent');
+  nc.style.display = nc.style.display==='none' ? 'block' : 'none';
+}
+
+// ══════════════════════════════════════════════
+//  PPTX DOWNLOAD  (to'g'ri va ishlaydigan)
+// ══════════════════════════════════════════════
+async function downloadPptx() {
+  if (!slidesData || !slidesData.slides) { alert('Avval prezentatsiya yarating!'); return; }
+
+  var btn = document.getElementById('downloadBtn');
+  btn.disabled    = true;
+  btn.textContent = '⏳ Yaratyapti...';
+
+  try {
+    var theme  = getTheme();
+
+    // PptxGenJS uchun rang formati (# siz, 6 belgi)
+    function hex(c) { return c.replace('#',''); }
+
+    var pptx = new PptxGenJS();
+    pptx.layout  = 'LAYOUT_16x9';
+    pptx.title   = slidesData.title   || 'NovaMind AI';
+    pptx.subject = slidesData.subtitle|| '';
+    pptx.author  = 'NovaMind AI';
+
+    // Har bir slayd uchun (i — lokal o'zgaruvchi, global emas!)
+    for (var i = 0; i < slidesData.slides.length; i++) {
+      var slide = slidesData.slides[i];
+      var type  = slide.type || 'content';
+      var s     = pptx.addSlide();
+
+      // Fon rangi
+      s.background = { color: hex(theme.bg) };
+
+      // Yuqori accent chiziq
+      s.addShape(pptx.ShapeType.rect, {
+        x:0, y:0, w:'100%', h:0.1,
+        fill: { color: hex(theme.accent) }
+      });
+
+      // Slayd uchun rasm (agar mavjud bo'lsa)
+      var imgData = (useImages && slideImages[i]) ? slideImages[i] : null;
+
+      if (type === 'title') {
+        // ── Title ──
+        s.addText(slide.title || '', {
+          x:0.6, y:1.2, w: imgData ? 5.5 : 9,
+          h:1.8, fontSize:36, bold:true,
+          color: hex(theme.text), align:'left', fontFace:'Calibri'
+        });
+        if (slide.subtitle) {
+          s.addText(slide.subtitle, {
+            x:0.6, y:3.2, w: imgData ? 5.5 : 9,
+            h:0.8, fontSize:18, color:hex(theme.sub), fontFace:'Calibri'
+          });
+        }
+        s.addShape(pptx.ShapeType.rect, { x:0.6, y:4.1, w:2, h:0.06, fill:{ color: hex(theme.accent) } });
+        s.addText(slidesData.author||'NovaMind AI', {
+          x:0.6, y:4.3, w:5, h:0.4, fontSize:13, color:hex(theme.sub), fontFace:'Calibri'
+        });
+        if (imgData) {
+          s.addImage({ data: imgData, x:6.4, y:0.8, w:3.2, h:4.2, rounding:true });
+        }
+
+      } else if (type === 'end') {
+        // ── End ──
+        if (imgData) {
+          s.addImage({ data: imgData, x:0, y:0.1, w:'100%', h:'100%', transparency:70 });
+        }
+        s.addText(slide.title||'Xulosa', {
+          x:0.5, y:1.5, w:9, h:1.5, fontSize:34, bold:true,
+          color:hex(theme.text), align:'center', fontFace:'Calibri'
+        });
+        if (slide.message) {
+          s.addText(slide.message, {
+            x:0.5, y:3.1, w:9, h:0.8, fontSize:17,
+            color:hex(theme.sub), align:'center', fontFace:'Calibri'
+          });
+        }
+        if (slide.contact) {
+          s.addText(slide.contact, {
+            x:2, y:4.0, w:6, h:0.5, fontSize:14,
+            color:hex(theme.accent), align:'center', fontFace:'Calibri'
+          });
+        }
+        s.addText('Powered by NovaMind AI', {
+          x:0.5, y:5.0, w:9, h:0.3, fontSize:11,
+          color:hex(theme.sub), align:'center', fontFace:'Calibri'
+        });
+
+      } else if (type === 'quote') {
+        // ── Quote ──
+        var qIdx = String(i+1).padStart(2,'0');
+        s.addText(qIdx, { x:0.4, y:0.25, w:0.8, h:0.4, fontSize:14, color:hex(theme.accent), fontFace:'Calibri' });
+        s.addText(slide.title||'', {
+          x:1.3, y:0.2, w: imgData ? 5.5 : 8.3, h:0.55,
+          fontSize:18, bold:true, color:hex(theme.text), fontFace:'Calibri'
+        });
+        s.addShape(pptx.ShapeType.rect, { x:1.3, y:0.8, w:1.5, h:0.05, fill:{ color:hex(theme.accent) } });
+        s.addShape(pptx.ShapeType.rect, {
+          x:0.4, y:1.3, w: imgData ? 6.2 : 9.2, h:3.2,
+          fill:{ color:hex(theme.card) }, line:{ color:hex(theme.accent), width:1 }
+        });
+        s.addText('"', { x:0.6, y:1.3, w:0.8, h:1, fontSize:60, color:hex(theme.accent), fontFace:'Georgia' });
+        s.addText(slide.quote||'', {
+          x:1.2, y:2.0, w: imgData ? 5.5 : 8.0, h:1.8,
+          fontSize:17, italic:true, color:hex(theme.text), fontFace:'Calibri'
+        });
+        if (slide.author) {
+          s.addText('— '+slide.author, {
+            x:1.2, y:3.9, w:5, h:0.4, fontSize:14,
+            color:hex(theme.accent), fontFace:'Calibri'
+          });
+        }
+        if (imgData) {
+          s.addImage({ data: imgData, x:6.8, y:1.3, w:2.8, h:3.2, rounding:true });
+        }
+
+      } else if (type === 'stats') {
+        // ── Stats ──
+        var stIdx = String(i+1).padStart(2,'0');
+        s.addText(stIdx, { x:0.4, y:0.25, w:0.8, h:0.4, fontSize:14, color:hex(theme.accent), fontFace:'Calibri' });
+        s.addText(slide.title||'', { x:1.3, y:0.2, w:8.3, h:0.55, fontSize:18, bold:true, color:hex(theme.text), fontFace:'Calibri' });
+        s.addShape(pptx.ShapeType.rect, { x:1.3, y:0.8, w:1.5, h:0.05, fill:{ color:hex(theme.accent) } });
+
+        var stats  = slide.stats || [];
+        var sw     = imgData ? 5.8/stats.length : 9.4/stats.length;
+        var startX = 0.3;
+        for (var si = 0; si < stats.length; si++) {
+          var st  = stats[si];
+          var sx  = startX + si * (sw + 0.2);
+          var sy  = imgData ? 1.2 : 1.4;
+          var sh  = imgData ? 2.2 : 3.0;
+          s.addShape(pptx.ShapeType.rect, { x:sx, y:sy, w:sw, h:sh, fill:{ color:hex(theme.card) }, line:{ color:hex(theme.accent), width:1 } });
+          s.addText(st.value||'', { x:sx, y:sy+0.3, w:sw, h:0.9, fontSize:28, bold:true, color:hex(theme.accent), align:'center', fontFace:'Calibri' });
+          s.addText(st.label||'', { x:sx, y:sy+1.2, w:sw, h:0.6, fontSize:12, color:hex(theme.sub), align:'center', fontFace:'Calibri' });
+        }
+        if (imgData) {
+          s.addImage({ data: imgData, x:6.5, y:1.2, w:3.1, h:3.3, rounding:true });
+        }
+
+      } else if (type === 'two_col') {
+        // ── Two column ──
+        var tcIdx = String(i+1).padStart(2,'0');
+        s.addText(tcIdx, { x:0.4, y:0.25, w:0.8, h:0.4, fontSize:14, color:hex(theme.accent), fontFace:'Calibri' });
+        s.addText(slide.title||'', { x:1.3, y:0.2, w:8.3, h:0.55, fontSize:18, bold:true, color:hex(theme.text), fontFace:'Calibri' });
+        s.addShape(pptx.ShapeType.rect, { x:1.3, y:0.8, w:1.5, h:0.05, fill:{ color:hex(theme.accent) } });
+
+        var cols = [
+          { title: slide.left_title||'',  points: slide.left_points||[],  x:0.3 },
+          { title: slide.right_title||'', points: slide.right_points||[], x:5.0 }
+        ];
+        cols.forEach(function(col) {
+          s.addShape(pptx.ShapeType.rect, { x:col.x, y:1.1, w:4.4, h:4.0, fill:{ color:hex(theme.card) }, line:{ color:hex(theme.accent), width:0.5 } });
+          s.addText(col.title, { x:col.x+0.2, y:1.3, w:4.0, h:0.5, fontSize:15, bold:true, color:hex(theme.accent), fontFace:'Calibri' });
+          var ptRows = col.points.map(function(p){ return { text:'▸ '+p+'\n', options:{fontSize:13, color:hex(theme.sub)} }; });
+          if (ptRows.length) s.addText(ptRows, { x:col.x+0.2, y:1.9, w:4.0, h:2.8, fontFace:'Calibri', valign:'top' });
+        });
+
+      } else {
+        // ── Content (default) ──
+        var ctIdx = String(i+1).padStart(2,'0');
+        s.addText(ctIdx, { x:0.4, y:0.25, w:0.8, h:0.4, fontSize:14, color:hex(theme.accent), fontFace:'Calibri' });
+        var titleW = imgData ? 5.8 : 9.0;
+        s.addText(slide.title||'', { x:1.3, y:0.2, w:titleW, h:0.55, fontSize:18, bold:true, color:hex(theme.text), fontFace:'Calibri' });
+        s.addShape(pptx.ShapeType.rect, { x:1.3, y:0.8, w:1.5, h:0.05, fill:{ color:hex(theme.accent) } });
+
+        var pts  = slide.points || [];
+        var ptW  = imgData ? 5.8 : 9.0;
+        pts.forEach(function(p, pi) {
+          var py = 1.2 + pi * 0.72;
+          s.addShape(pptx.ShapeType.ellipse, { x:0.35, y:py+0.08, w:0.2, h:0.2, fill:{ color:hex(theme.accent) } });
+          s.addText(p, { x:0.7, y:py, w:ptW, h:0.6, fontSize:15, color:hex(theme.sub), fontFace:'Calibri' });
+        });
+
+        if (imgData) {
+          s.addImage({ data: imgData, x:6.5, y:1.0, w:3.1, h:4.0, rounding:true });
+        }
+      }
+
+      // Speaker notes
+      if (slide.notes) s.addNotes(slide.notes);
+    }
+
+    // Fayl nomini tozalash
+    var fname = (slidesData.title||'prezentatsiya')
+      .replace(/[^\w\s\u0400-\u04FF\u0100-\u017F]/g, '')
+      .trim()
+      .replace(/\s+/g,'_')
+      .slice(0, 50);
+
+    await pptx.writeFile({ fileName: fname + '.pptx' });
+
+  } catch(err) {
+    alert('PPTX xatolik: ' + err.message);
+    console.error(err);
+  }
+
+  btn.disabled    = false;
+  btn.textContent = '⬇️ PPTX Yuklab olish';
+}
+</script>
+
+<style>
+/* ── Layout ── */
+.slides-page{display:flex;height:calc(100vh - 66px);overflow:hidden;position:relative;z-index:1}
+.slides-panel{width:360px;flex-shrink:0;overflow-y:auto;border-right:1px solid var(--border);background:var(--bg1);padding:22px;display:flex;flex-direction:column;gap:18px}
+.slides-preview{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.panel-header h1{font-family:var(--fhead);font-size:26px;font-weight:800;letter-spacing:-.5px;margin:6px 0 4px}
+.panel-header p{font-size:13px;color:var(--txt2)}
+
+/* ── Form ── */
+.slides-form{display:flex;flex-direction:column;gap:13px}
+.sf-group{display:flex;flex-direction:column;gap:6px}
+.sf-label{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.8px}
+.sf-textarea,.sf-input,.sf-select{width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--txt);padding:10px 13px;border-radius:var(--r);font-family:var(--fbody);font-size:13.5px;outline:none;transition:var(--t);-webkit-appearance:none}
+.sf-textarea:focus,.sf-input:focus,.sf-select:focus{border-color:var(--border2);box-shadow:0 0 0 3px rgba(0,212,255,.07)}
+.sf-textarea{resize:vertical;min-height:75px;line-height:1.6}
+.sf-select option{background:var(--bg2)}
+.sf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sf-btn{width:100%;padding:14px;border-radius:var(--r2);border:none;cursor:pointer;background:linear-gradient(135deg,var(--cyan),var(--violet2));color:#fff;font-family:var(--fhead);font-size:15px;font-weight:700;transition:var(--t)}
+.sf-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,212,255,.25)}
+.sf-btn:disabled{opacity:.6;cursor:not-allowed}
+.sf-examples{display:flex;flex-wrap:wrap;gap:6px}
+.sf-ex-label{font-size:10.5px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;width:100%;margin-bottom:2px}
+.sf-ex{padding:5px 11px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--txt2);font-size:11.5px;cursor:pointer;transition:var(--t);font-family:var(--fbody)}
+.sf-ex:hover{border-color:var(--border2);color:var(--cyan)}
+
+/* ── Image toggle ── */
+.sf-toggle-wrap{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.sf-toggle{display:flex;align-items:center;gap:10px;cursor:pointer}
+.toggle-slider{width:38px;height:20px;background:var(--bg3);border-radius:999px;position:relative;transition:.3s;flex-shrink:0}
+.toggle-slider::after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.3s}
+.sf-toggle input:checked + .toggle-slider{background:var(--cyan)}
+.sf-toggle input:checked + .toggle-slider::after{left:20px}
+.sf-toggle input{display:none}
+.toggle-label{font-size:13px;font-weight:600;color:var(--txt)}
+.sf-toggle-note{font-size:11px;color:var(--txt3);line-height:1.5}
+
+/* ── Loading ── */
+.preview-empty,.preview-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;text-align:center;padding:40px}
+.preview-empty h3,.preview-loading h3{font-family:var(--fhead);font-size:18px;font-weight:700}
+.preview-empty p,.preview-loading p{font-size:13px;color:var(--txt2)}
+.loading-orbit{position:relative;width:72px;height:72px;display:flex;align-items:center;justify-content:center}
+.lo-ring{position:absolute;inset:0;border-radius:50%;border:2.5px solid transparent;border-top-color:var(--cyan);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lo-core{font-size:26px;color:var(--cyan)}
+.loading-bar-wrap{width:220px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:8px}
+.loading-bar{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet2));border-radius:2px;transition:width .4s ease;width:0%}
+
+/* ── Result layout ── */
+#slidesResult{display:flex;flex-direction:column;height:100%;overflow:hidden}
+
+/* ── Toolbar ── */
+.slides-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--bg1);flex-shrink:0}
+.toolbar-info{display:flex;align-items:center;gap:10px}
+.slide-count-badge{padding:4px 12px;border-radius:999px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:var(--cyan);font-size:12px;font-weight:700}
+.slide-title-text{font-size:12.5px;color:var(--txt2);font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toolbar-actions{display:flex;align-items:center;gap:6px}
+.tb-btn{padding:7px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--card);color:var(--txt2);font-size:13px;cursor:pointer;transition:var(--t);font-family:var(--fbody)}
+.tb-btn:hover{border-color:var(--border2);color:var(--cyan)}
+.tb-download{background:linear-gradient(135deg,var(--cyan),var(--violet2));border:none;color:#fff;font-weight:700;padding:7px 16px}
+.tb-download:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,212,255,.25);color:#fff}
+.tb-download:disabled{opacity:.6;cursor:not-allowed}
+.slide-nav{font-family:var(--fhead);font-size:13px;font-weight:700;color:var(--txt2);min-width:44px;text-align:center}
+
+/* ── Canvas ── */
+.slide-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);overflow:hidden}
+.slide-canvas{width:100%;max-width:840px;aspect-ratio:16/9;border-radius:14px;overflow:hidden;box-shadow:0 20px 70px rgba(0,0,0,.6);position:relative;transition:background .3s}
+
+/* ── Slide HTML components ── */
+.sl-slide{width:100%;height:100%;position:relative;overflow:hidden}
+.sl-top-bar{position:absolute;top:0;left:0;right:0;height:5px;z-index:2}
+.sl-deco{position:absolute;right:-80px;bottom:-100px;width:320px;height:320px;border-radius:50%;pointer-events:none}
+.sl-glow{position:absolute;inset:0;pointer-events:none}
+.sl-center{display:flex;align-items:center;justify-content:center;text-align:center}
+
+/* Title */
+.sl-title-body{display:flex;align-items:center;height:100%;padding:clamp(16px,3%,36px) clamp(20px,4%,48px) clamp(16px,3%,36px)}
+.sl-title-img{flex-shrink:0;width:40%;padding-right:20px;display:flex;align-items:center}
+.sl-title-text-block{flex:1;display:flex;flex-direction:column;gap:10px}
+.sl-eyebrow{font-size:clamp(9px,1.1vw,12px);font-weight:700;text-transform:uppercase;letter-spacing:2px}
+.sl-big-title{font-family:var(--fhead);font-size:clamp(18px,4vw,40px);font-weight:900;line-height:1.1;margin:0;letter-spacing:-.5px}
+.sl-big-sub{font-size:clamp(11px,1.7vw,18px);margin:0;line-height:1.5}
+.sl-hr{height:4px;width:70px;border-radius:2px;flex-shrink:0}
+.sl-author{font-size:clamp(9px,1.1vw,13px);margin:0}
+
+/* End */
+.sl-end-img{position:absolute;inset:0;overflow:hidden}
+.sl-end-img img{width:100%;height:100%;object-fit:cover;opacity:.12}
+.sl-end-body{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px}
+.sl-end-icon{width:56px;height:56px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:24px}
+.sl-contact-chip{padding:7px 20px;border-radius:999px;border:1px solid;font-size:clamp(10px,1.3vw,14px)}
+.sl-powered{font-size:clamp(9px,1vw,12px);margin:0}
+
+/* Content slides common */
+.sl-content-body{display:flex;flex-direction:column;height:100%;padding:clamp(10px,2%,24px) clamp(16px,3%,32px);gap:8px}
+.sl-has-img{flex-direction:row;gap:14px}
+.sl-left-col{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.sl-right-img{flex-shrink:0;width:38%;display:flex;align-items:center}
+.sl-header{display:flex;align-items:flex-start;gap:10px;flex-shrink:0}
+.sl-num{font-family:var(--fhead);font-size:clamp(16px,2.8vw,32px);font-weight:900;opacity:.55;line-height:1;flex-shrink:0}
+.sl-title{font-family:var(--fhead);font-size:clamp(13px,2vw,22px);font-weight:800;line-height:1.2;margin:0}
+.sl-underline{height:3px;width:44px;border-radius:2px;margin-top:4px}
+
+/* Points */
+.sl-points-list{display:flex;flex-direction:column;gap:clamp(5px,1vw,10px);flex:1}
+.sl-pt-row{display:flex;align-items:flex-start;gap:8px;animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.sl-pt-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.sl-pt-txt{font-size:clamp(10px,1.4vw,16px);line-height:1.5}
+
+/* Quote */
+.sl-quote-box{flex:1;padding:clamp(10px,2%,20px);border-radius:10px;border-left:4px solid;display:flex;flex-direction:column;gap:8px}
+.sl-qq{font-size:clamp(36px,6vw,70px);line-height:.7;font-family:Georgia,serif;flex-shrink:0}
+.sl-quote-txt{font-size:clamp(11px,1.7vw,20px);line-height:1.6;font-style:italic}
+.sl-quote-auth{font-size:clamp(10px,1.3vw,15px);font-weight:600}
+
+/* Stats */
+.sl-stats-row{display:flex;gap:clamp(6px,1.2vw,12px);flex:1;align-items:center}
+.sl-stat-box{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(8px,1.5%,18px);border-radius:10px;border:1px solid;gap:6px}
+.sl-stat-val{font-family:var(--fhead);font-size:clamp(18px,3.5vw,38px);font-weight:900;line-height:1}
+.sl-stat-lbl{font-size:clamp(9px,1.1vw,13px);text-align:center;line-height:1.4}
+
+/* Two col */
+.sl-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(6px,1.2vw,12px);flex:1}
+.sl-col{padding:clamp(10px,1.5%,18px);border-radius:10px;display:flex;flex-direction:column;gap:6px}
+.sl-col-h{font-family:var(--fhead);font-size:clamp(11px,1.5vw,16px);font-weight:700;margin-bottom:4px}
+.sl-pt{font-size:clamp(9px,1.3vw,14px);line-height:1.5;display:flex;gap:4px;align-items:flex-start}
+
+/* Images in slides */
+.sl-img-panel{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.sl-img{width:100%;height:100%;object-fit:cover;border-radius:10px;display:block}
+.sl-right-img .sl-img-panel,.sl-right-img{height:100%}
+
+/* ── Thumbs ── */
+.slide-thumbs{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;border-top:1px solid var(--border);background:var(--bg1);flex-shrink:0;scrollbar-width:thin;scrollbar-color:var(--bg3) transparent}
+.thumb-item{flex-shrink:0;width:90px;height:58px;border-radius:8px;border:2px solid transparent;background:var(--card);cursor:pointer;transition:var(--t);position:relative;overflow:hidden}
+.thumb-item:hover{border-color:var(--border2)}
+.thumb-item.active{border-color:var(--cyan)!important}
+.thumb-img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-bg{width:100%;height:100%;background:var(--bg2)}
+.thumb-footer{position:absolute;bottom:3px;left:5px;font-family:var(--fhead);font-size:12px;font-weight:800;line-height:1}
+.thumb-lbl{position:absolute;bottom:2px;left:20px;font-size:9px;color:var(--txt3);white-space:nowrap;overflow:hidden;max-width:65px;text-overflow:ellipsis}
+
+/* ── Notes ── */
+.notes-bar{border-top:1px solid var(--border);background:var(--bg1);flex-shrink:0}
+.notes-toggle-btn{width:100%;padding:8px;border:none;background:transparent;color:var(--txt3);font-size:12px;cursor:pointer;transition:var(--t);font-family:var(--fbody);text-align:left;padding-left:18px}
+.notes-toggle-btn:hover{color:var(--txt);background:var(--bg2)}
+.notes-content{padding:10px 18px 14px;font-size:13px;color:var(--txt2);line-height:1.6;border-top:1px solid var(--border)}
+
+/* ── Responsive ── */
+@media(max-width:860px){
+  .slides-page{flex-direction:column;height:auto;overflow:auto}
+  .slides-panel{width:100%;border-right:none;border-bottom:1px solid var(--border)}
+  .slides-preview{min-height:75vh}
+  .slide-canvas-wrap{padding:12px}
+  .slide-title-text{display:none}
+}
+</style>
+{% endblock %}

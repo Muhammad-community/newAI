@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — To'lov Muvaffaqiyatli{% endblock %}
+{% block content %}
+<div class="pay-result-page">
+  <div class="pay-result-glow success-glow"></div>
+  <div class="pay-result-box">
+
+    <div class="pay-result-anim">
+      <svg class="checkmark" viewBox="0 0 52 52">
+        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+      </svg>
+    </div>
+
+    <h1>To'lov muvaffaqiyatli! 🎉</h1>
+
+    {% if plan_name and plan_name in plans %}
+    <div class="pay-plan-activated">
+      <span class="pay-plan-icon">
+        {% if plan_name=='pro' %}⭐{% elif plan_name=='premium' %}💎{% elif plan_name=='ultra' %}🚀{% endif %}
+      </span>
+      <div>
+        <strong>{{ plans[plan_name].name }} plan faollashtirildi</strong>
+        <span>${{ plans[plan_name].price }}/oy · Stripe tomonidan himoyalangan</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <p class="pay-result-desc">
+      Siz endi barcha
+      {% if plan_name=='pro' %}Pro{% elif plan_name=='premium' %}Premium{% elif plan_name=='ultra' %}Ultra{% endif %}
+      imkoniyatlaridan foydalanishingiz mumkin. Obuna har oyda avtomatik yangilanadi.
+    </p>
+
+    <div class="pay-result-features">
+      {% if plan_name == 'pro' %}
+      <div class="prf-item">✅ Barcha 4 ta AI model</div>
+      <div class="prf-item">✅ LLaMA 3.3 70B</div>
+      <div class="prf-item">✅ Cheksiz suhbat</div>
+      {% elif plan_name == 'premium' %}
+      <div class="prf-item">✅ Barcha 4 ta AI model</div>
+      <div class="prf-item">✅ 🎨 Rasm yaratish</div>
+      <div class="prf-item">✅ Cheksiz suhbat</div>
+      {% elif plan_name == 'ultra' %}
+      <div class="prf-item">✅ Barcha 4 ta AI model</div>
+      <div class="prf-item">✅ 🎨 Rasm yaratish</div>
+      <div class="prf-item">✅ 🗂️ Slayd yaratish</div>
+      {% endif %}
+    </div>
+
+    <div class="pay-result-btns">
+      <a href="/ai" class="prb-primary">✦ AI Chat ga o'tish</a>
+      {% if plan_name in ['premium','ultra'] %}
+      <a href="/imagine" class="prb-secondary">🎨 Rasm yaratish</a>
+      {% endif %}
+      {% if plan_name == 'ultra' %}
+      <a href="/slides" class="prb-secondary">🗂️ Slayd yaratish</a>
+      {% endif %}
+      <a href="/plans" class="prb-outline">⚙️ Obunani boshqarish</a>
+    </div>
+
+    <p class="pay-receipt-note">
+      📧 To'lov kvitansiyasi emailingizga yuborildi.<br>
+      Savollar uchun: <a href="/contact">Bog'lanish</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

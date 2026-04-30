@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — Foydalanish{% endblock %}
+{% block content %}
+
+<section class="page-hero">
+  <div class="page-eyebrow">Usage Guide</div>
+  <h1>Qanday <span class="glow-text">foydalanish</span> kerak?</h1>
+  <p>NovaMind AI'dan maksimal foyda olish uchun to'liq qo'llanma</p>
+</section>
+
+<!-- VIDEO SECTION - FIXED -->
+<section class="vid-section">
+  <h2 class="sec-title-sm">📹 Video qo'llanma</h2>
+  <p class="sec-desc">Tugmani bosing va video sahifada yuklansin</p>
+
+  <div class="video-wrap" id="videoWrap">
+    <!-- THUMBNAIL (ko'rinadi) -->
+    <div class="vid-thumb" id="vidThumb">
+      <div class="thumb-bg"></div>
+      <div class="thumb-content">
+        <div class="play-circle" onclick="playVideo()">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="thumb-text">
+          <h3>NovaMind AI — To'liq qo'llanma</h3>
+          <p>⏱ Taxminan 3-5 daqiqa · O'zbekcha izoh</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- IFRAME (yashirin, bosilganda ko'rinadi) -->
+    <div class="vid-player" id="vidPlayer">
+      <iframe
+        id="ytFrame"
+        width="100%"
+        height="100%"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        style="border:0; display:block;">
+      </iframe>
+      <button class="vid-close-btn" onclick="stopVideo()">✕ Yopish</button>
+    </div>
+
+    <!-- Video ID ni shu yerda o'zgartiring -->
+    <script>
+      // ⚠️  O'zingizning YouTube video ID sini qo'ying:
+      var VIDEO_ID = "dQw4w9WgXcQ";
+
+      function playVideo() {
+        document.getElementById('vidThumb').style.display  = 'none';
+        document.getElementById('vidPlayer').style.display = 'block';
+        document.getElementById('ytFrame').src =
+          'https://www.youtube.com/embed/' + VIDEO_ID +
+          '?autoplay=1&rel=0&modestbranding=1&color=white';
+        document.getElementById('videoWrap').scrollIntoView({behavior:'smooth', block:'center'});
+      }
+
+      function stopVideo() {
+        document.getElementById('ytFrame').src = '';
+        document.getElementById('vidPlayer').style.display = 'none';
+        document.getElementById('vidThumb').style.display  = 'flex';
+      }
+    </script>
+  </div>
+
+  <div class="vid-note">
+    💡 <strong>Izoh:</strong> Video ID ni o'zgartirish uchun <code>usage.html</code> faylida
+    <code>VIDEO_ID = "..."</code> qatorini toping va YouTube video ID sini qo'ying.
+  </div>
+</section>
+
+<!-- Steps -->
+<section class="steps-section">
+  <h2 class="sec-title-sm">📋 Bosqichma-bosqich</h2>
+  <div class="steps-timeline">
+    {% set steps = [
+      ("🌐","Saytni oching","Brauzerda NovaMind AI saytini kiriting. Ro'yxatdan o'tish shart emas.",""),
+      ("⚙️","Modelni tanlang","Yuqori paneldan o'zingizga mos AI modelini tanlang. LLaMA 3.3 70B — eng kuchli.","llama-3.3-70b-versatile"),
+      ("🎨","Uslub tanlang","Standart, Rasmiy, Ijodiy, Sodda yoki Hazilkash uslublardan birini tanlang.",""),
+      ("✍️","Savol yozing","Chat maydoniga savolingizni yozing. Qanchalik aniq bo'lsa, shunchalik yaxshi javob olasiz.",""),
+      ("⚡","Javob oling","Enter bosing. Groq'ning superkompyuteri tezda javob tayyorlaydi.",""),
+      ("💾","Eksport qiling","Suhbatni JSON yoki matn formatida yuklab olishingiz mumkin.",""),
+    ] %}
+    {% for icon, title, desc, hint in steps %}
+    <div class="step-item">
+      <div class="step-left">
+        <div class="step-num">{{loop.index}}</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <div class="step-icon-lg">{{icon}}</div>
+        <h4>{{title}}</h4>
+        <p>{{desc}}</p>
+        {% if hint %}<div class="step-hint">💡 {{hint}} modeli tavsiya etiladi</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Tips -->
+<section class="tips-section">
+  <h2 class="sec-title-sm">💡 Pro maslahatlar</h2>
+  <div class="tips-grid">
+    <div class="tip-card">
+      <div class="tip-num">01</div>
+      <h4>Aniq so'rang</h4>
+      <p>«Python da ro'yxat saralash» emas, «Python da bubble sort algoritmini yoz va vaqt murakkabligini tushuntir» deb so'rang.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">02</div>
+      <h4>Rol bering</h4>
+      <p>«Sen tajribali Python dasturchisan...» yoki «Sen marketing ekspertisan...» deb boshlang. AI yanada yaxshi javob beradi.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">03</div>
+      <h4>Davom ettiring</h4>
+      <p>Bitta suhbatda bir necha savol bering. AI kontekstni eslab qoladi va bog'liq javob beradi.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">04</div>
+      <h4>Model tanlang</h4>
+      <p>Kod uchun LLaMA 70B, tezlik uchun LLaMA 8B, ko'p til uchun Mixtral 8x7B ishlatib ko'ring.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">05</div>
+      <h4>Ijodkorlik slayderi</h4>
+      <p>0 = aniq va qat'iy javob, 1 = ijodiy va kutilmagan javob. Maqsadga qarab o'zgartiring.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">06</div>
+      <h4>Eksport qiling</h4>
+      <p>Muhim suhbatlarni eksport tugmasi orqali saqlang. JSON yoki matn formatida yuklanadi.</p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

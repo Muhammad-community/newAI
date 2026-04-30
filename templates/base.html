@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{% block title %}NovaMind AI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Nunito:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-trail" id="cursorTrail"></div>
+  <canvas id="particles" class="particles-canvas"></canvas>
+  <div class="aurora">
+    <div class="aurora-1"></div>
+    <div class="aurora-2"></div>
+    <div class="aurora-3"></div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <a href="/" class="nav-logo">
+      <div class="logo-hex">
+        <svg viewBox="0 0 40 40" width="36" height="36">
+          <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <polygon points="20,8 31,14.5 31,25.5 20,32 9,25.5 9,14.5" fill="currentColor" opacity="0.15"/>
+          <text x="20" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">N</text>
+        </svg>
+      </div>
+      <span>Nova<span class="logo-accent">Mind</span></span>
+    </a>
+
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/" class="nav-link {% if request.path=='/' %}active{% endif %}"><span>Home</span></a></li>
+      <li><a href="/ai" class="nav-link nav-ai {% if request.path=='/ai' %}active{% endif %}"><span>✦ AI Chat</span></a></li>
+      <li><a href="/imagine" class="nav-link {% if request.path=='/imagine' %}active{% endif %}"><span>🎨 Imagine</span></a></li>
+      <li><a href="/slides" class="nav-link {% if request.path=='/slides' %}active{% endif %}"><span>🗂️ Slides</span></a></li>
+      <li><a href="/plans" class="nav-link {% if request.path=='/plans' %}active{% endif %}"><span>💎 Planlar</span></a></li>
+      <li><a href="/about" class="nav-link {% if request.path=='/about' %}active{% endif %}"><span>About</span></a></li>
+      <li><a href="/contact" class="nav-link {% if request.path=='/contact' %}active{% endif %}"><span>Contact</span></a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" title="Tema almashtirish">
+        <span class="theme-icon">🌙</span>
+      </button>
+
+      {% if user %}
+      <!-- User menu -->
+      <div class="nav-user-wrap" id="navUserWrap">
+        <button class="nav-user-btn" id="navUserBtn" onclick="toggleUserMenu()">
+          <div class="nav-avatar">{{ user.username[0].upper() }}</div>
+          <div class="nav-user-info">
+            <span class="nav-username">{{ user.username }}</span>
+            <span class="nav-plan-badge nav-plan-{{ user.plan }}">
+              {% if user.plan == 'free' %}🆓 Free
+              {% elif user.plan == 'pro' %}⭐ Pro
+              {% elif user.plan == 'premium' %}💎 Premium
+              {% elif user.plan == 'ultra' %}🚀 Ultra{% endif %}
+            </span>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="nav-user-dropdown" id="navUserDropdown">
+          <div class="dropdown-header">
+            <strong>{{ user.username }}</strong>
+            <span>{{ user.email }}</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a href="/plans" class="dropdown-item">💎 Planni o'zgartirish</a>
+          <a href="/usage" class="dropdown-item">📊 Statistika</a>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" class="dropdown-item dropdown-logout">🚪 Chiqish</a>
+        </div>
+      </div>
+      {% else %}
+      <a href="/login" class="nav-login-btn">Kirish</a>
+      <a href="/register" class="nav-register-btn">Ro'yxat ✦</a>
+      {% endif %}
+
+      <button class="burger" id="burger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-hex small">
+            <svg viewBox="0 0 40 40" width="28" height="28">
+              <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="none" stroke="currentColor" stroke-width="2"/>
+              <text x="20" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor">N</text>
+            </svg>
+          </div>
+          <span>Nova<span class="logo-accent">Mind</span> AI</span>
+        </div>
+        <p>O'zbekiston uchun eng aqlli AI yordamchi</p>
+      </div>
+      <div class="footer-links-col">
+        <h4>Sahifalar</h4>
+        <a href="/">Home</a><a href="/ai">AI Chat</a>
+        <a href="/imagine">🎨 Imagine</a><a href="/slides">🗂️ Slides</a>
+        <a href="/plans">💎 Planlar</a>
+      </div>
+      <div class="footer-links-col">
+        <h4>Yaratuvchi</h4>
+        <a href="/creator">Tolibov Muhammad</a>
+        <a href="https://t.me/tolibovmuhammad" target="_blank">Telegram</a>
+        <a href="https://github.com/tolibovmuhammad" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-links-col">
+        <h4>Hisob</h4>
+        {% if user %}
+        <a href="/plans">💎 Planlar</a>
+        <a href="/logout">🚪 Chiqish</a>
+        {% else %}
+        <a href="/login">Kirish</a>
+        <a href="/register">Ro'yxatdan o'tish</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 NovaMind AI · Yaratuvchi: <a href="/creator">Tolibov Muhammad</a> · Powered by Groq ⚡</p>
+      <div class="footer-status"><span class="pulse-dot"></span> Barcha tizimlar ishlayapti</div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+  function toggleUserMenu(){
+    const d = document.getElementById('navUserDropdown');
+    d.classList.toggle('open');
+  }
+  document.addEventListener('click', function(e){
+    const wrap = document.getElementById('navUserWrap');
+    if(wrap && !wrap.contains(e.target)){
+      const d = document.getElementById('navUserDropdown');
+      if(d) d.classList.remove('open');
+    }
+  });
+  </script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}NovaMind AI — Ro'yxatdan o'tish{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-glow"></div>
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-hex">
+        <svg viewBox="0 0 40 40" width="44" height="44">
+          <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <polygon points="20,8 31,14.5 31,25.5 20,32 9,25.5 9,14.5" fill="currentColor" opacity="0.15"/>
+          <text x="20" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="currentColor">N</text>
+        </svg>
+      </div>
+      <div>
+        <h2>Nova<span class="logo-accent">Mind</span> AI</h2>
+        <p class="auth-sub">Yangi hisob yaratish</p>
+      </div>
+    </div>
+
+    <div id="authError" class="auth-error" style="display:none"></div>
+    <div id="authSuccess" class="auth-success" style="display:none"></div>
+
+    <div class="fgroup">
+      <label>👤 Username</label>
+      <input type="text" id="username" placeholder="foydalanuvchi_nomi" autocomplete="username"/>
+      <span class="fhint">Kamida 3 ta belgi</span>
+    </div>
+    <div class="fgroup">
+      <label>📧 Email</label>
+      <input type="email" id="email" placeholder="email@example.com" autocomplete="email"/>
+    </div>
+    <div class="fgroup">
+      <label>🔒 Parol</label>
+      <div class="pass-wrap">
+        <input type="password" id="password" placeholder="Kamida 6 ta belgi" autocomplete="new-password"/>
+        <button class="pass-eye" onclick="togglePass()" type="button">👁</button>
+      </div>
+    </div>
+
+    <div class="plan-select-row">
+      <span class="fhint">Ro'yxatdan o'tgandan so'ng plan tanlashingiz mumkin</span>
+    </div>
+
+    <button class="btn-auth" id="regBtn" onclick="doRegister()">
+      <span class="btn-glow-inner">Ro'yxatdan o'tish ✦</span>
+    </button>
+
+    <div class="auth-divider"><span>yoki</span></div>
+
+    <div class="auth-footer">
+      Hisobingiz bormi? <a href="/login">Kirish →</a>
+    </div>
+    <div class="auth-footer" style="margin-top:8px">
+      <a href="/" style="color:var(--txt3);font-size:13px">← Bosh sahifaga qaytish</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePass(){
+  const p = document.getElementById('password');
+  p.type = p.type === 'password' ? 'text' : 'password';
+}
+
+async function doRegister(){
+  const btn  = document.getElementById('regBtn');
+  const errEl = document.getElementById('authError');
+  const sucEl = document.getElementById('authSuccess');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+  const username = document.getElementById('username').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if(!username || !email || !password){ showErr('Barcha maydonlarni to\'ldiring'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-glow-inner">Yuklanmoqda...</span>';
+  try {
+    const res  = await fetch('/api/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username, email, password})
+    });
+    const data = await res.json();
+    if(data.success){
+      sucEl.textContent = '✅ Muvaffaqiyatli ro\'yxatdan o\'tdingiz! Yo\'naltirilmoqda...';
+      sucEl.style.display = 'block';
+      const nxt = new URLSearchParams(location.search).get('next') || '/plans';
+      setTimeout(() => location.href = nxt, 1000);
+    } else {
+      showErr(data.error || 'Xatolik yuz berdi');
+      btn.disabled = false;
+      btn.innerHTML = '<span class="btn-glow-inner">Ro\'yxatdan o\'tish ✦</span>';
+    }
+  } catch(e){
+    showErr('Tarmoq xatoligi');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="btn-glow-inner">Ro\'yxatdan o\'tish ✦</span>';
+  }
+}
+function showErr(msg){
+  const el = document.getElementById('authError');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+}
+</script>
+{% endblock %}
