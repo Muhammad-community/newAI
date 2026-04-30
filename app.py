@@ -14,7 +14,7 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
 GROQ_URL     = "https://api.groq.com/openai/v1/chat/completions"
 
 MODELS = {
@@ -389,7 +389,7 @@ def create_slides():
     if not topic: return jsonify({"error":"Mavzu kiritilmadi"}), 400
     lang_map = {"uz":"O'zbek tilida","ru":"Rus tilida","en":"English"}
     sys_p = 'Siz professional prezentatsiya yaratuvchi AI. FAQAT JSON: {"title":"...","subtitle":"...","author":"NovaMind AI","slides":[{"type":"title","title":"...","subtitle":"...","notes":"..."},{"type":"content","title":"...","points":["..."],"notes":"..."},{"type":"end","title":"...","message":"...","notes":"..."}]}'
-    user_p = f"Mavzu: {topic}\nSoni: {count}\nTil: {lang_map.get(lang,'O\'zbek')}\nUslub: {style}\nFAQAT JSON."
+    user_p = f"Mavzu: {topic}Soni: {count}Til: {lang_map.get(lang,'Ozbek')}Uslub: {style}\nFAQAT JSON."
     try:
         raw,tokens = groq_chat(
             [{"role":"system","content":sys_p},{"role":"user","content":user_p}],
